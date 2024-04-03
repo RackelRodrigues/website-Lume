@@ -1,4 +1,4 @@
-#!C:\Users\leo-f\teste_lume\venv\Scripts\python.exe
+#!C:\Users\Higo\Downloads\Arquivos - 2023\Higo\Projeto Lume\website-Lume\Backend\venv\Scripts\python.exe
 
 import datetime
 import os

@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=C:\Users\leo-f\teste_lume\venv
+set VIRTUAL_ENV=C:\Users\Higo\Downloads\Arquivos - 2023\Higo\Projeto Lume\website-Lume\Backend\venv
 
 if not defined PROMPT set PROMPT=$P$G
 
