@@ -4,3 +4,4 @@ flask_sqlalchemy
 email_validator
 peewee
 psycopg2
+Werkzeug
