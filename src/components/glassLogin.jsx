@@ -246,7 +246,7 @@ Lembre de mim
         <Button>Increver-se</Button>
         <ButtonGoogle>Conecte with Google</ButtonGoogle>
 
-        <Text>Ainda não tem uma conta? <Span color="#D0A460" href="/CriarConta">Criar conta</Span></Text>
+        <Text>Ainda não tem uma conta? <Span color="#ec8020" href="/CriarConta">Criar conta</Span></Text>
 </BoxInformation>
 
         </Box>
