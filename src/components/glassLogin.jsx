@@ -4,6 +4,8 @@ import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 import { useState } from "react";
+import axios from 'axios';
+
 
 const Box = styled.div`
 width: 100%;
@@ -197,18 +199,60 @@ const ToggleButton = styled.button`
   cursor: pointer;
 `;
 
+const Form = styled.form`
+   
+`;
+
 
 const GlassLogin = () => {
 
+        const [email, setEmail] = useState('');
+        const [senha, setSenha] = useState('');
         const [showPassword, setShowPassword] = useState(false);
+        const [rememberMe, setRememberMe] = useState(false);
         const togglePasswordVisibility = () => {
                 setShowPassword(prev => !prev);
+        };
+
+        const [showInputs, setShowInputs] = useState(false);
+
+        const handleSubmit = async (e) => {
+          e.preventDefault();
+        
+          try {
+            const response = await axios.post('http://127.0.0.1:5000/login', {
+              email: email,
+              senha: senha,
+            }, {
+              headers: {
+                withCredentials: true,
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': 'http://127.0.0.1:5000/login'
+              }
+            });
+        
+            if (response.status === 200) {
+              window.location.href = '/'; // Redirecionar para a página inicial se o login for bem-sucedido
+            } else {
+              alert('Erro ao fazer login. Por favor, tente novamente.');
+            }
+          } catch (error) {
+            if (error.response.status === 302) {
+              const redirectUrl = error.response.headers.location;
+              if (redirectUrl) {
+                window.location.href = redirectUrl; // Redirecionar para a URL de redirecionamento
+              }
+            } else {
+              console.error(error);
+              alert('Erro ao fazer login. Por favor, tente novamente.');
+            }
+          }
         };
         
     return (
         <>
         <Box>
-             
+        <Form onSubmit={handleSubmit}>
         <ContainerTitulo>
         <LogoImg src={Logo_lume} alt="Logo lume"/>
         <Titulo>Lume</Titulo>
@@ -218,7 +262,11 @@ const GlassLogin = () => {
 <Boxinputs>
         <Label>Email</Label>
         <ContainerInput>
-        <Input type="text"/>
+        <Input 
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        />
         </ContainerInput>
 </Boxinputs>
 
@@ -227,28 +275,34 @@ const GlassLogin = () => {
         <ContainerInput>
         <Input  
           type={showPassword ? "text" : "password"}
+          value={senha}
+          onChange={(e) => setSenha(e.target.value)}
         />
         <ToggleButton onClick={togglePasswordVisibility}>
-                {showPassword ? <FaRegEyeSlash size={20}/> : <FaRegEye  size={20}/>}
+                {showPassword ? <FaRegEye size={20}/> : <FaRegEyeSlash  size={20}/>}
               </ToggleButton>
-     
+              
         </ContainerInput>
         </Boxinputs>
 </BoxCenter>
 <ContainerEsqueceu>
 <Boxcheckbox>
-<Checkbox type="checkbox" name="Lembre de mim"  value="Lmembrar"/>
+<Checkbox  
+type="checkbox"
+checked={rememberMe}
+ onChange={(e) => setRememberMe(e.target.checked)}/>
 Lembre de mim
 </Boxcheckbox>
+
 <Forget>Esqueceu a senha</Forget>
 </ContainerEsqueceu>
 <BoxInformation>
-        <Button>Increver-se</Button>
+        <Button type="submit" onClick={() => setShowInputs(true)}>Increver-se</Button>
         <ButtonGoogle>Conecte with Google</ButtonGoogle>
 
-        <Text>Ainda não tem uma conta? <Span color="#ec8020" href="/CriarConta">Criar conta</Span></Text>
+        <Text>Ainda não tem uma conta? <Span color="#ec8020" href="/ContaCont">Criar conta</Span></Text>
 </BoxInformation>
-
+</Form>
         </Box>
           
         </>

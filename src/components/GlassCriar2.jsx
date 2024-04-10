@@ -3,6 +3,8 @@ import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 import { useState } from "react";
+import axios from 'axios';
+
 
 const Box = styled.div`
 width: 100%;
@@ -86,7 +88,6 @@ align-items: center;
 margin: 20px 0 30px 0;
 `;
 
-
 const Button = styled.button`
 width: 400px;
 height: 45px;
@@ -95,7 +96,7 @@ background-color: #D0A460;
 border-radius: 30px;
 border: 0;
 outline: none;
-margin-top:  30px;
+margin-top:  5px;
 font-family: Raleway;
 font-size: 20px;
 font-weight: 100;
@@ -107,6 +108,7 @@ font-weight: 100;
 outline: none;
 }
 `;
+
 
 const ButtonPurple = styled.button`
 width: 400px;
@@ -145,6 +147,8 @@ const Erro = styled.p`
 
 
 
+
+
 const ToggleButton = styled.button`
   margin-right: 15px;
   background: none;
@@ -152,14 +156,39 @@ const ToggleButton = styled.button`
   cursor: pointer;
 `;
 
+const Text = styled.p`
+font-family: Raleway;
+font-size: 15px;
+font-weight: 50;
+color: ${(props) => props.color || "#fff"};
+display: flex;
+margin-top:  30px;
+`;
+
+const Span = styled.a`
+font-family: Raleway;
+font-size: 15px;
+font-weight: 50;
+color: ${(props) => props.color || "#fff"};
+margin-left: 8px;
+cursor: pointer;
+
+`;
+
+const Form = styled.form`
+   
+`;
+
 const Glasscriar2 =()=>{
 
 
-
+    const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [confirme, setConfirme] = useState('');
+    const [erroEmail, setErroEmail] = useState('');
     const [errosenha, setErroSenha] = useState('');
     const [erroconfirme, setErroConfirme] = useState('');
+
     const validarCampos = () => {
         let valido = true;
         if (senha.trim() === '') {
@@ -169,11 +198,16 @@ const Glasscriar2 =()=>{
           setErroSenha('');
         }
       
-        if (confirme.trim() === '') {
-          setErroConfirme('Por favor, preencha o Confirme sua senha.');
+        if (senha.trim() !== confirme.trim()) {
+          setErroSenha('As senhas não coincidem. Por favor, verifique.');
+          setErroConfirme('As senhas não coincidem. Por favor, verifique.');
+          valido = false;
+        }
+        if (email.trim() === '') {
+          setErroEmail('Por favor, preencha o email.');
           valido = false;
         } else {
-          setErroConfirme('');
+          setErroEmail('');
         }
       
        
@@ -184,7 +218,7 @@ const Glasscriar2 =()=>{
       const handleAvancarClick = () => {
         if (validarCampos()) {
          
-            window.location.href = '/';
+            
         }
       };
 
@@ -199,13 +233,63 @@ const Glasscriar2 =()=>{
         setShowConfirme(prev => !prev);
       };
 
+      const handleCadastro = async (e) => {
+        e.preventDefault(); // Evita o comportamento padrão do formulário
+        if (validarCampos()) {
+          try {
+            console.log(email);
+            console.log(senha);
+            const response = await axios.post(
+              'http://127.0.0.1:5000/cadastro',
+              {
+                email: email,
+                senha: senha,
+                confirm_password: confirme,
+              },
+              {
+                headers: {
+                  withCredentials: true,
+                  'Content-Type': 'application/json',
+                  'Access-Control-Allow-Origin': 'http://127.0.0.1:5000',
+                },
+              }
+            );
+      
+            if (response.status === 200) {
+             
+              history.push('/login');
+            } else {
+              const errorData = response.data;
+              alert(errorData.message);
+            }
+          } catch (error) {
+            console.error(error);
+            alert('Erro ao cadastrar. Por favor, tente novamente.');
+          }
+        }
+      };
+      
     return(
         <>
         <Box>
+     
+        <Form onSubmit={handleCadastro}>
+
             <BoxHead>
-        <Titulo>Criar um Perfil</Titulo>
+        <Titulo>Criar Conta</Titulo>
         </BoxHead>
 <BoxCenter>
+<Boxinputs>
+        <Label>Email</Label>
+        <ContainerInput>
+     <Input   
+       type="email"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}/>
+        </ContainerInput>
+        {erroEmail && <Erro>{erroEmail}</Erro>}
+       
+    </Boxinputs>
     <Boxinputs>
         <Label>Senha</Label>
         <ContainerInput>
@@ -215,7 +299,7 @@ const Glasscriar2 =()=>{
       onChange={(e) => setSenha(e.target.value)}/>
 
        <ToggleButton onClick={togglePasswordVisibility}>
-                {showPassword ? <FaRegEyeSlash size={20}/> : <FaRegEye  size={20}/>}
+                {showPassword ? <FaRegEye size={20}/> : <FaRegEyeSlash  size={20}/>}
               </ToggleButton>
         </ContainerInput>
         {errosenha && <Erro>{errosenha}</Erro>}
@@ -229,7 +313,7 @@ const Glasscriar2 =()=>{
             onChange={(e) => setConfirme(e.target.value)}
             />
               <ToggleButton onClick={toggleConfirmeVisibility}>
-                {showConfirme ? <FaRegEyeSlash size={20}/> : <FaRegEye  size={20}/>}
+                {showConfirme ? <FaRegEye size={20}/> : <FaRegEyeSlash  size={20}/>}
               </ToggleButton>
        
         </ContainerInput>
@@ -238,13 +322,15 @@ const Glasscriar2 =()=>{
 </BoxCenter>
 <BoxFinal>
 
-<StyledLink to="/CriarConta">
-<Button>Retornar</Button>
-</StyledLink>
 
 
-<ButtonPurple onClick={handleAvancarClick }>Finalizar</ButtonPurple>
+<Button onClick={handleAvancarClick} type="submit">Avançar</Button>
+
+
+<Text>Já tem uma conta? <Span color="#D0A460" href="/Login">Faça Login</Span></Text>
 </BoxFinal>
+
+</Form>
         </Box>
         </>
     )

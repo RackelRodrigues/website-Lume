@@ -101,6 +101,29 @@ outline: none;
 }
 `;
 
+
+
+const ButtonPurple = styled.button`
+width: 400px;
+height: 45px;
+color: #000;
+background-color: #C084FC;
+border-radius: 30px;
+border: 0;
+outline: none;
+margin-top:  30px;
+font-family: Raleway;
+font-size: 20px;
+font-weight: 100;
+
+
+&:hover {
+ background-color:  #9333ea;
+ border: 0;
+outline: none;
+}
+`;
+
 const BoxLinks = styled.div`
 display: flex;
 flex-direction: column;
@@ -198,6 +221,17 @@ const GlassCriarConta = () =>{
 
     const [fotoPreview, setFotoPreview] = useState('');
 
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirme, setShowConfirme] = useState(false);
+
+    const togglePasswordVisibility = () => {
+      setShowPassword(prev => !prev);
+    };
+
+    const toggleConfirmeVisibility = () => {
+      setShowConfirme(prev => !prev);
+    };
+
     const handleFotoChange = (e) => {
       const file = e.target.files[0];
       if (file) {
@@ -209,10 +243,17 @@ const GlassCriarConta = () =>{
       }
     };
 
+    const handleAvancarClick = () => {
+      if (validarCampos()) {
+       
+          window.location.href = '/';
+      }
+    };
+
     const [nome, setNome] = useState('');
-    const [email, setEmail] = useState('');
+    const [nomeusuario, setNomeusuario] = useState('');
     const [erroNome, setErroNome] = useState('');
-    const [erroEmail, setErroEmail] = useState('');
+    const [errousuario, setErroUsuario] = useState('');
     const validarCampos = () => {
         let valido = true;
         if (nome.trim() === '') {
@@ -222,25 +263,40 @@ const GlassCriarConta = () =>{
           setErroNome('');
         }
       
-        if (email.trim() === '') {
-          setErroEmail('Por favor, preencha o email.');
+        if (nomeusuario.trim() === '') {
+          setErroUsuario('Por favor, preencha o Nome de usuario.');
           valido = false;
         } else {
-          setErroEmail('');
+          setErroUsuario('');
         }
       
        
         return valido;
       };
       
-      // Função para lidar com o clique no botão "Avançar"
-      const handleAvancarClick = () => {
-        if (validarCampos()) {
+     
+      const handleReturn = () => {
+        
          
             window.location.href = '/ContaCont';
+        
+      };
+
+      const handleSubmit = async () => {
+        const formData = new FormData();
+        formData.append("imagem_perfil", foto);
+    
+        try {
+          const response = await axios.post("http://127.0.0.1:5000/upload", formData);
+          window.location.href = '/';
+          console.log(response.data);
+        } catch (error) {
+          console.error(error);
         }
       };
 
+
+      
     return(
         <>
 <Box>
@@ -251,7 +307,7 @@ const GlassCriarConta = () =>{
 <InputFoto type="file" accept="image/*" onChange={handleFotoChange} />
 {fotoPreview ? (
           <PreviaFoto>
-            <ImgFoto src={fotoPreview} alt="Preview da foto" />
+            <ImgFoto src={fotoPreview} alt="Preview da foto" style={{ maxWidth: "200px", maxHeight: "200px" }}/>
           </PreviaFoto>
         ) : (
           <Span>
@@ -274,22 +330,24 @@ const GlassCriarConta = () =>{
 </Boxinputs>
 
 <Boxinputs>
-<Label>Email</Label>
+<Label>Nome do usuario</Label>
 <ContainerInput>
     <Input 
-     type="Email"
-      value={email}
-      onChange={(e) => setEmail(e.target.value)}/>
-      {erroEmail && <Erro>{erroEmail}</Erro>}
+     type="nomeusuario"
+      value={nomeusuario}
+      onChange={(e) => setNomeusuario(e.target.value)}/>
+      {errousuario && <Erro>{errousuario}</Erro>}
 </ContainerInput>
 </Boxinputs>
+
+
 </BoxCenter>
 
 <BoxLinks>
 
-    <Button onClick={handleAvancarClick}> Avançar</Button>
-
-<Text>Já tem uma conta? <Span color="#D0A460" href="/Login">Faça Login</Span></Text>
+    <Button onClick={handleReturn} > Retornar</Button>
+    
+    <ButtonPurple onClick={handleAvancarClick }>Finalizar</ButtonPurple>
 </BoxLinks>
 </Box>
         </>
