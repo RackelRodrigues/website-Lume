@@ -1,0 +1,2 @@
+npm install redux react-redux
+npm install (para insatlar tudo do reactjs)

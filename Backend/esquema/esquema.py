@@ -8,7 +8,7 @@ class BaseModel(Model):
 
 class Usuarios(BaseModel):
     email = CharField(max_length=255, unique=True, null=False)
-    senha = CharField(max_length=100, null=False)
+    senha = CharField(max_length=250, null=False)
 
 class Perfil(BaseModel):
     usuario = ForeignKeyField(Usuarios, backref='perfil', field='id')

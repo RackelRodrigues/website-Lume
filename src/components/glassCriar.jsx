@@ -2,6 +2,9 @@ import styled from "styled-components";
 import { useState } from "react";
 import { Link } from 'react-router-dom';
 import { BsPersonBoundingBox } from "react-icons/bs";
+import { useSelector } from 'react-redux';
+import axios from 'axios';
+import { toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
 
@@ -217,6 +220,11 @@ const Erro = styled.p`
 `;
 
 
+
+const Form = styled.form`
+   
+`;
+
 const GlassCriarConta = () =>{
 
     const [fotoPreview, setFotoPreview] = useState('');
@@ -243,17 +251,13 @@ const GlassCriarConta = () =>{
       }
     };
 
-    const handleAvancarClick = () => {
-      if (validarCampos()) {
-       
-          window.location.href = '/';
-      }
-    };
+  
 
     const [nome, setNome] = useState('');
     const [nomeusuario, setNomeusuario] = useState('');
     const [erroNome, setErroNome] = useState('');
     const [errousuario, setErroUsuario] = useState('');
+
     const validarCampos = () => {
         let valido = true;
         if (nome.trim() === '') {
@@ -273,39 +277,67 @@ const GlassCriarConta = () =>{
        
         return valido;
       };
-      
+
+      const [email, setEmail ]= useState('')
+      const { currentUser } = useSelector((rootReducer) => rootReducer.userReducer);
+      const navigate = useNavigate()
      
-      const handleReturn = () => {
-        
-         
-            window.location.href = '/ContaCont';
-        
-      };
-
-      const handleSubmit = async () => {
-        const formData = new FormData();
-        formData.append("imagem_perfil", foto);
+      const handleCriarPerfil = async (e) => {
+        e.preventDefault(); 
+        setEmail(currentUser.currentUser);
+        if (validarCampos()) {
     
-        try {
-          const response = await axios.post("http://127.0.0.1:5000/upload", formData);
-          window.location.href = '/';
-          console.log(response.data);
+          try {
+            const response = await axios.post(
+                'http://127.0.0.1:5000/criar_perfil',
+                {
+                    name: nome,
+                    username: nomeusuario,
+                    email: email,
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': 'http://127.0.0.1:5000',
+                    },
+                }
+            );  
+            console.log("Dados a serem enviados:", {
+              name: nome,
+              username: nomeusuario
+          });
+    
+            if (response.status === 201 || 200) {
+              
+                toast.success(response.data.message);
+                navigate("/");
+            } else {
+                
+                const errorData = response.data;
+                toast.error(errorData.message);
+            }
         } catch (error) {
-          console.error(error);
+            console.error(error);
+            toast.error("Erro ao criar perfil. Por favor, tente novamente.");
         }
+   
       };
+    }
+    
 
-
+     
       
     return(
         <>
+         <ToastContainer/>
 <Box>
+ <Form onSubmit={handleCriarPerfil}>
     <BoxHead>
-<Titulo>Criar um perfil</Titulo>
+      <Titulo>Criar um perfil</Titulo>
 
-<FotoDiv>
-<InputFoto type="file" accept="image/*" onChange={handleFotoChange} />
-{fotoPreview ? (
+      <FotoDiv>
+      <InputFoto type="file" accept="image/*" onChange={handleFotoChange} />
+       {fotoPreview ? (
           <PreviaFoto>
             <ImgFoto src={fotoPreview} alt="Preview da foto" style={{ maxWidth: "200px", maxHeight: "200px" }}/>
           </PreviaFoto>
@@ -345,10 +377,11 @@ const GlassCriarConta = () =>{
 
 <BoxLinks>
 
-    <Button onClick={handleReturn} > Retornar</Button>
+    <Button> Retornar</Button>
     
-    <ButtonPurple onClick={handleAvancarClick }>Finalizar</ButtonPurple>
+    <ButtonPurple onClick={handleCriarPerfil}>Finalizar</ButtonPurple>
 </BoxLinks>
+</Form>
 </Box>
         </>
     )

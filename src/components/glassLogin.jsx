@@ -232,7 +232,7 @@ const GlassLogin = () => {
             });
         
             if (response.status === 200) {
-              window.location.href = '/'; // Redirecionar para a página inicial se o login for bem-sucedido
+              window.location.href = '/';
             } else {
               alert('Erro ao fazer login. Por favor, tente novamente.');
             }
@@ -240,7 +240,7 @@ const GlassLogin = () => {
             if (error.response.status === 302) {
               const redirectUrl = error.response.headers.location;
               if (redirectUrl) {
-                window.location.href = redirectUrl; // Redirecionar para a URL de redirecionamento
+                window.location.href = redirectUrl; 
               }
             } else {
               console.error(error);

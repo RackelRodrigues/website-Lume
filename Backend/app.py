@@ -59,7 +59,6 @@ def cadastro():
         if len(email) > 255 or len(senha) > 100:
             return jsonify({'message': 'O email deve ter no máximo 255 caracteres e a senha deve ter no máximo 100 caracteres'}), 400
 
-       
         if senha!= confirm_password:
             return jsonify({'message': 'A senha e a confirmação de senha não correspondem'}), 400
 
@@ -77,7 +76,6 @@ def cadastro():
         return jsonify({'message': f"Ocorreu um erro durante o cadastro: {e}"}), 500
 
 
-
 @app.route("/criar_perfil", methods=['POST'])
 def criar_perfil():
     if request.method == 'POST':
@@ -85,17 +83,26 @@ def criar_perfil():
             data = request.get_json()
             name = data.get('name')
             username = data.get('username')
-        
-            new_perfil = Perfil(name=name, username=username)
+            email = data.get('email')  
+            
+            # Verifica se o email não está vazio
+            if not email:
+                return jsonify({'message': 'Email não pode ser vazio'}), 400
+            
+            # Busca o usuário pelo e-mail
+            user = Usuarios.get(Usuarios.email == email)
+            
+            new_perfil = Perfil(usuario=user.id, nome=name, nome_usuario=username)
             new_perfil.save()
 
             return jsonify({'message': 'Perfil criado com sucesso'}), 201
 
+        except Usuarios.DoesNotExist:
+            return jsonify({'message': 'Usuário não encontrado'}), 404
         except Exception as e:
             return jsonify({'message': f"Erro ao criar perfil: {e}"}), 500
 
     return 'Cuida'
-
 
 
 @app.route("/uploud", methods=['POST'])

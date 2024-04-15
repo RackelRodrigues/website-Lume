@@ -2,8 +2,13 @@ import styled from "styled-components";
 import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { Link } from 'react-router-dom';
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 import { useState } from "react";
 import axios from 'axios';
+import UserActionTypes from "../redux/user/action-types";
+import { useDispatch } from "react-redux";
+import {useNavigate} from 'react-router-dom';
 
 
 const Box = styled.div`
@@ -110,26 +115,8 @@ outline: none;
 `;
 
 
-const ButtonPurple = styled.button`
-width: 400px;
-height: 45px;
-color: #000;
-background-color: #C084FC;
-border-radius: 30px;
-border: 0;
-outline: none;
-margin-top:  30px;
-font-family: Raleway;
-font-size: 20px;
-font-weight: 100;
 
 
-&:hover {
- background-color:  #9333ea;
- border: 0;
-outline: none;
-}
-`;
 
 const BoxFinal = styled.div`
 display: flex;
@@ -188,6 +175,7 @@ const Glasscriar2 =()=>{
     const [erroEmail, setErroEmail] = useState('');
     const [errosenha, setErroSenha] = useState('');
     const [erroconfirme, setErroConfirme] = useState('');
+    const [redirect, setRedirect] = useState(false);
 
     const validarCampos = () => {
         let valido = true;
@@ -215,30 +203,29 @@ const Glasscriar2 =()=>{
       };
       
       
-      const handleAvancarClick = () => {
-        if (validarCampos()) {
-         
-            
-        }
-      };
+    
+
+      const dispatch = useDispatch();
 
       const [showPassword, setShowPassword] = useState(false);
       const [showConfirme, setShowConfirme] = useState(false);
 
-      const togglePasswordVisibility = () => {
+      const PasswordVisibility = (e) => {
+        e.preventDefault();
         setShowPassword(prev => !prev);
       };
 
-      const toggleConfirmeVisibility = () => {
+      const ConfirmeVisibility = (e) => {
+        e.preventDefault();
         setShowConfirme(prev => !prev);
       };
+     
+      let navigate = useNavigate();
 
       const handleCadastro = async (e) => {
-        e.preventDefault(); // Evita o comportamento padrão do formulário
+        e.preventDefault(); 
         if (validarCampos()) {
           try {
-            console.log(email);
-            console.log(senha);
             const response = await axios.post(
               'http://127.0.0.1:5000/cadastro',
               {
@@ -252,25 +239,41 @@ const Glasscriar2 =()=>{
                   'Content-Type': 'application/json',
                   'Access-Control-Allow-Origin': 'http://127.0.0.1:5000',
                 },
+               
               }
             );
-      
-            if (response.status === 200) {
+            dispatch({
+              type: UserActionTypes.ATUALIZAR_EMAIL,
+              payload: { currentUser: email }
+            });
+            if (response.status === 201 || 200) { 
+              navigate("/CriarConta")
+              toast.success(response.data.message);
+              
+              
              
-              history.push('/login');
+              setEmail('');
+              setSenha('');
+              setConfirme('');
+              
             } else {
               const errorData = response.data;
-              alert(errorData.message);
+              toast.error(errorData.message);
             }
           } catch (error) {
             console.error(error);
-            alert('Erro ao cadastrar. Por favor, tente novamente.');
+
+            toast.error("Erro ao cadastrar. Por favor, tente novamente.");
+
           }
         }
       };
       
+
+      
     return(
         <>
+        <ToastContainer/>
         <Box>
      
         <Form onSubmit={handleCadastro}>
@@ -298,7 +301,7 @@ const Glasscriar2 =()=>{
       value={senha}
       onChange={(e) => setSenha(e.target.value)}/>
 
-       <ToggleButton onClick={togglePasswordVisibility}>
+       <ToggleButton  onClick={(e) => PasswordVisibility(e)}>
                 {showPassword ? <FaRegEye size={20}/> : <FaRegEyeSlash  size={20}/>}
               </ToggleButton>
         </ContainerInput>
@@ -312,7 +315,7 @@ const Glasscriar2 =()=>{
             value={confirme}
             onChange={(e) => setConfirme(e.target.value)}
             />
-              <ToggleButton onClick={toggleConfirmeVisibility}>
+              <ToggleButton  onClick={(e) => ConfirmeVisibility(e)}>
                 {showConfirme ? <FaRegEye size={20}/> : <FaRegEyeSlash  size={20}/>}
               </ToggleButton>
        
@@ -324,7 +327,7 @@ const Glasscriar2 =()=>{
 
 
 
-<Button onClick={handleAvancarClick} type="submit">Avançar</Button>
+<Button onClick={handleCadastro} type="submit">Avançar</Button>
 
 
 <Text>Já tem uma conta? <Span color="#D0A460" href="/Login">Faça Login</Span></Text>

@@ -1,4 +1,12 @@
 import styled, { keyframes } from 'styled-components';
+import { Link } from 'react-router-dom';
+
+const StyledLink = styled(Link)`
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+`;
+
 
 const Img = styled.img`
 height: 450px;
@@ -39,7 +47,7 @@ border-radius: 30px;
 font-size: 20px;
 font-weight: 100;
 transition: background-color 0.3s ease; 
-
+cursor: pointer;
   
 &:hover {
     background-color: #C022FC; }
@@ -92,7 +100,9 @@ const MainHome1 =()=>{
         </Subtitulo>
         </ConteinerHome>
        <ConteinerBottom>
+        <StyledLink to='/Login'>
         <Button>Explorar</Button>  
+        </StyledLink>
         <Img src='https://i.ibb.co/7JwZ7s8/livros-home.png' alt='foto de Livros'/>
         </ConteinerBottom>
         <ConteinerImagem>

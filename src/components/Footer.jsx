@@ -37,7 +37,7 @@ margin-left: 10px;
 const ConteinerLogo = styled.div`
 display: flex;
 align-items: center;
-
+margin-bottom: 30px;
 `;
 
 
@@ -127,7 +127,7 @@ font-size: 18px;
 font-weight: 300;
 font-family: Raleway;
 width: 320px;
-
+margin-bottom: 40px;
 
 `;
 
