@@ -5,8 +5,9 @@ from wtforms.validators import DataRequired, Email, EqualTo
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
-from esquema.esquema import *
+from esquema.esquema import Usuarios, Livros, Perfil, Favoritos
 import os, re
+import requests
 from flask_cors import CORS
 
 
@@ -53,7 +54,7 @@ def cadastro():
     try:
         data = request.get_json()
         email = data.get('email')
-        senha= data.get('senha')
+        senha= data.get('password')
         confirm_password = data.get('confirm_password')
 
         if len(email) > 255 or len(senha) > 100:
@@ -119,14 +120,14 @@ def uploud():
         return 'Tamanho do arquivo excede o limite permitido'
     
     #Caminho onde deseja salvar as imagens
-    path = 'C:\\Users\\Rackel Rodrigues\\Pictures\\imagesLume'
+
+    #path = 'C:\\Users\\Rackel Rodrigues\\Pictures\\imagesLume'
+    path = 'C:\\Users\\Higo\\Downloads\\Arquivos - 2023\\Higo\Projeto Lume\\uploud_imagens'
     image.save(os.path.join(path, image.filename))
 
     return 'Uploud de imagem realizado com sucesso!'
 
 
-
-#Não precisa mexer eu já criei a rota
 @app.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
@@ -146,9 +147,120 @@ def login():
         else:
             flash('Usuário não encontrado', 'error')
 
-
     # Não renderiza o template, apenas trata a requisição POST
     return redirect(url_for('home'))
+
+@app.route('/cadastrar_livro', methods=['POST'])
+def cadastrar_livro():
+
+    data = request.json
+    titulo = data.get('titulo')
+    autor = data.get('autor')
+    isbn = data.get('isbn') # identificador único para livros, nº de 13 dígitos
+    usuario_id = data.get('usuario_id')
+
+    # Construir a URL de pesquisa na API
+    url = 'https://www.googleapis.com/books/v1/volumes?q='
+
+    if titulo:
+        url += f'intitle:{titulo}+'
+    if autor:
+        url += f'inauthor:{autor}+'
+    if isbn:
+        url += f'isbn:{isbn}'
+
+    # Fazer a solicitação à API de livros do Google
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        # Extrair os detalhes do livro da resposta da API
+        livro_info = response.json()
+
+        #  Detalhes relevantes do livro e cadastrar no banco de dados
+        titulo = livro_info.get('title', '')
+        autor = ', '.join(livro_info.get('authors', []))
+        sinopse = livro_info.get('description', '')
+
+
+        # Adiciona os detalhes extraídos do livro ao banco de dados
+        novo_livro = Livros(usuario_id=usuario_id, livro_id=isbn, status='', titulo=titulo, autor=autor, sinopse=sinopse)
+        novo_livro.save()
+
+        return jsonify({'message': 'Livro cadastrado com sucesso'}), 200
+    else:
+        return jsonify({'error': 'Falha ao obter informações do livro da API de livros do Google'}), 500
+   
+    
+@app.route ('/adicionar_favoritos', methods=['POST'])
+def adicionar_favoritos():
+    data = request.json
+    usuario_id = data.get('usuario_id')
+    livro_id = data.get('livro_id')
+    avaliacao = data.get('avaliacao', None)
+
+    # Verefica se o usuário e o livro existem
+    if not Usuarios.get_or_none(id=usuario_id):
+        return jsonify({'error': 'Usuário não encontrado'}), 404
+    if not Livros.get_or_none(id=livro_id):
+        return jsonify({'error': 'Livro não encontrado'}), 404
+    
+    
+    # Adiciona o livro aos favoritos se a avaliação for 5 estrelas
+    if avaliacao == 5:
+        novo_favorito = Favoritos.create(id_usuario=usuario_id, id_livro=livro_id, avaliacao=avaliacao)
+        return jsonify({'error': 'Livro adicionado aos favoritos com sucesso'}), 200
+    else:
+        return jsonify({'message': 'Livro não atendeu aos critérios para ser adicionado aos favoritos'}), 200
+    
+
+@app.route('botao_adicionar_favoritos', methods=['POST'])
+def botao_adicionar_favoritos():
+    data = request.json
+    usuario_id = data.get('usuario_id')
+    livro_id = data.get('livro_id')
+
+    # Verifica se o usuário e o livro existem
+    if not Usuarios.get_or_none(id=usuario_id):
+        return jsonify({'error': 'Usuário não encontrado'}), 404
+    if not Livros.get_or_none(id=livro_id):
+        return jsonify({'error': 'Livro não encontrado'}), 404
+
+    # Adiciona o livro aos favoritos diretamente
+    novo_favorito = Favoritos.create(id_usuario=usuario_id, id_livro=livro_id, classificacao=5)
+    return jsonify({'message': 'Livro adicionado diretamente aos favoritos com sucesso'}), 200
+
+@app.route('/remover_livro', methods=['POST'])
+def remover_livro():
+    data = request.json
+    livro_id = data.get('livro_id')
+    usuario_id = data.get('usuario_id')
+    status_leitura = data.get('status_leitura')
+
+    try:
+        livro = Livros.get(Livros.id == livro_id, Livros.usuario_id == usuario_id)
+        if livro:
+            # Verifique o status de leitura do livro
+            if status_leitura == 'lendo':
+                livro.lendo = False
+            elif status_leitura == 'lido':
+                livro.lido = False
+            elif status_leitura == 'quero_ler':
+                livro.quero_ler = False
+            elif status_leitura == 'abandonei':
+                livro.abandonei = False
+            else:
+                return jsonify({'error': 'Status de leitura inválido'}), 400
+            
+            # Salvar as alterações no banco de dados
+            livro.save()
+            
+            return jsonify({'message': 'Livro removido com sucesso'}), 200
+        else:
+            return jsonify({'error': 'Esse livro não foi adicionado a nenhuma lista'}), 404
+    except Livros.DoesNotExist:
+        return jsonify({'error': 'Esse livro não foi adicionado a nenhuma lista'}), 404
+    except Exception as e:
+        return jsonify({'error': f'Erro ao remover o livro: {str(e)}'}), 500
 
 
 @app.route('/')
