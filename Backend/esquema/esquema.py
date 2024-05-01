@@ -25,6 +25,9 @@ class Livros(BaseModel):
     lido = BooleanField(default=False)
     quero_ler = BooleanField(default=False)
     abandonado = BooleanField(default=False)
+<<<<<<< HEAD
+>>>>>>> 530c3c739dc12bd43f97fc6ad91cbd2abda74393
+=======
 >>>>>>> 530c3c739dc12bd43f97fc6ad91cbd2abda74393
 
 class Favoritos(BaseModel):
