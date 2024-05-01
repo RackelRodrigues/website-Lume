@@ -114,7 +114,6 @@ def criar_perfil():
 
     return 'Cuida'
 
-<<<<<<< HEAD
 @app.route('/perfil/inicial/<email>', methods=['GET'])
 def get_inicial(email):
     try:
@@ -128,31 +127,6 @@ def get_inicial(email):
     except Exception as e:
         return jsonify({'error': f'Erro ao buscar perfil inicial: {str(e)}'}), 500
 #Não precisa mexer eu já criei a rota
-=======
-
-@app.route("/uploud", methods=['POST'])
-def uploud():
-    if 'imagem_perfil' not in request.files:
-        return 'Nenhuma imagem enviada'
-    image = request.files['imagem_perfil']
-
-    if image.filename == '':
-        return 'Nenhum arquivo selecionado'
-    if not allowed_file(image.filename):
-        return 'Tipo de arquivo não permetido'
-    if image.content_length > MAX_FILE_SIZE:
-        return 'Tamanho do arquivo excede o limite permitido'
-    
-    #Caminho onde deseja salvar as imagens
-
-    #path = 'C:\\Users\\Rackel Rodrigues\\Pictures\\imagesLume'
-    path = 'C:\\Users\\Higo\\Downloads\\Arquivos - 2023\\Higo\Projeto Lume\\uploud_imagens'
-    image.save(os.path.join(path, image.filename))
-
-    return 'Uploud de imagem realizado com sucesso!'
-
-
->>>>>>> 530c3c739dc12bd43f97fc6ad91cbd2abda74393
 @app.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
