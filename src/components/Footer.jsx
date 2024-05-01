@@ -212,7 +212,7 @@ const Footer = ()=>{
         <Subnames>Central de Ajuda</Subnames>
         <Subnames>Contato</Subnames>
         <Subnames>FAQ</Subnames>
-        <Subnames>POlítica de Privacidade</Subnames>
+        <Subnames>Política de Privacidade</Subnames>
         </BoxNames>
         <BoxNames>
         <Titulos>Social</Titulos>

@@ -18,8 +18,8 @@ const StyledPiQuotes = styled(PiQuotes)`
 
 const Box = styled.div`
 width: 100%;
-max-width: 350px;
-height: 150px;
+max-width: 360px;
+height: 155px;
 border-radius: 60px;
 background-color: rgba(255, 255, 255, 0.15);
 backdrop-filter:blur(8.5px);
@@ -78,7 +78,8 @@ color:  #1C1D20;
 font-family: Raleway;
 font-size: 12px;
 font-weight: 400;
-margin-left: 10px; 
+width: 300px;
+height: 150;
 
 `;
 

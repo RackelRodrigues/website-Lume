@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { BsPersonBoundingBox } from "react-icons/bs";
 import { useSelector } from 'react-redux';
 import axios from 'axios';
+import UserActionTypes from "../redux/user/action-types";
+import { useDispatch } from "react-redux";
 import { toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
@@ -68,6 +70,7 @@ border-radius: 10px;
 
 
 `;
+
 
 const Boxinputs = styled.div`
 display: flex;
@@ -228,7 +231,7 @@ const Form = styled.form`
 const GlassCriarConta = () =>{
 
     const [fotoPreview, setFotoPreview] = useState('');
-
+    const [foto, setFoto] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirme, setShowConfirme] = useState(false);
 
@@ -248,15 +251,27 @@ const GlassCriarConta = () =>{
           setFotoPreview(reader.result);
         };
         reader.readAsDataURL(file);
+        setFoto(file);
       }
     };
 
-  
+    const getInitials = (fullName) => {
+      const parts = fullName.split(' ');
+      return parts.length > 1
+        ? parts[0].charAt(0) + parts[1].charAt(0)
+        : parts[0].charAt(0);
+    };
+
+    const dispatch = useDispatch();
+    
 
     const [nome, setNome] = useState('');
+    const [inicial, setInicial] = useState('');
     const [nomeusuario, setNomeusuario] = useState('');
     const [erroNome, setErroNome] = useState('');
     const [errousuario, setErroUsuario] = useState('');
+    
+
 
     const validarCampos = () => {
         let valido = true;
@@ -285,15 +300,20 @@ const GlassCriarConta = () =>{
       const handleCriarPerfil = async (e) => {
         e.preventDefault(); 
         setEmail(currentUser.currentUser);
+        console.log(currentUser);
+        console.log(currentUser.email)
+        console.log(inicial)
+
         if (validarCampos()) {
-    
+       
           try {
             const response = await axios.post(
                 'http://127.0.0.1:5000/criar_perfil',
                 {
                     name: nome,
                     username: nomeusuario,
-                    email: email,
+                    email: currentUser.email,
+                    inicial: getInitials(nome),
                 },
                 {
                     headers: {
@@ -302,11 +322,36 @@ const GlassCriarConta = () =>{
                     },
                 }
             );  
+
+            const formData = new FormData();
+           formData.append('foto', foto);
+          
+
+      if (foto) {
+        const formData = new FormData();
+        formData.append('foto', foto);
+
+        const fotoResponse = await axios.post(
+          'http://127.0.0.1:5000/upload',
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              'Access-Control-Allow-Origin': 'http://127.0.0.1:5000',
+            },
+          }
+        );
+      }
             console.log("Dados a serem enviados:", {
               name: nome,
-              username: nomeusuario
+              username: nomeusuario,
+              inicial: inicial
           });
-    
+      
+      dispatch({
+        type: UserActionTypes.ATUALIZAR_NOME,
+        payload: { nome: getInitials(nome) }
+      });
             if (response.status === 201 || 200) {
               
                 toast.success(response.data.message);
@@ -377,7 +422,7 @@ const GlassCriarConta = () =>{
 
 <BoxLinks>
 
-    <Button> Retornar</Button>
+    <Button > Retornar</Button>
     
     <ButtonPurple onClick={handleCriarPerfil}>Finalizar</ButtonPurple>
 </BoxLinks>

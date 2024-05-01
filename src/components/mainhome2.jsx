@@ -87,6 +87,8 @@ const Boxtext = styled.div`
   
 `;
 
+const Historypart = styled.section``;
+
 const  MainHome2 =()=>{
   const [ref, inView] = useInView({
     threshold: 0.5, 
@@ -96,6 +98,7 @@ const  MainHome2 =()=>{
 
     return(
     <>
+    <Historypart id='nossa-historia'>
     <Conteiner>
     <BackgroundImage>
     <Img src="https://i.ibb.co/WVGCGkV/walpaper-livros.jpg" alt="livros"/>
@@ -115,7 +118,7 @@ No Lume, os usuários podem marcar livros como "quero ler", "lendo" e "abandonad
       )}
     </BackgroundTexto>
 </Conteiner>
-
+</Historypart>
     </>)
  }
 

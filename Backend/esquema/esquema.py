@@ -14,7 +14,7 @@ class Perfil(BaseModel):
     usuario = ForeignKeyField(Usuarios, backref='perfil', field='id')
     nome = CharField(max_length=100)
     nome_usuario = CharField(max_length=8, unique=True)
-
+    inicial = CharField(max_length=8, unique=True)
 
 db.connect()
 db.create_tables([Usuarios, Perfil])

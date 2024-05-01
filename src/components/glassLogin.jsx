@@ -3,6 +3,8 @@ import Logo_lume from '../images/logo_lume.png';
 import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { Link } from 'react-router-dom';
+import  {  GoogleOAuthProvider, GoogleLogin   }from '@react-oauth/google' ;
+import { jwtDecode } from "jwt-decode";
 import { useState } from "react";
 import axios from 'axios';
 
@@ -65,20 +67,13 @@ outline: none;
 `;
 
 
-const ButtonGoogle = styled.button`
+const DivLogin = styled.div`
+margin-top: 20px;
 width: 400px;
-height: 45px;
-color: #000;
-background-color: #D9D9D9;
-border-radius: 30px;
-border: 0;
-outline: none;
-margin-top:  30px;
-&:hover {
- background-color: #9333ea;
- border: 0;
-outline: none;
-}
+display: flex;
+align-items: center;
+justify-content: center;
+ 
 `;
 
 const Label = styled.p`
@@ -298,7 +293,22 @@ Lembre de mim
 </ContainerEsqueceu>
 <BoxInformation>
         <Button type="submit" onClick={() => setShowInputs(true)}>Increver-se</Button>
-        <ButtonGoogle>Conecte with Google</ButtonGoogle>
+
+      <DivLogin>
+        
+        <GoogleOAuthProvider 
+        clientId ="638778227780-jkrvm6jp7af25cdbsm0udlgqirch88qv.apps.googleusercontent.com">
+        <GoogleLogin
+         onSuccess={credentialResponse => { 
+          const decoded = jwtDecode(credentialResponse.credential);
+          console.log(decoded);
+          setEmail(decoded.email);
+        }} 
+        onError={() => { 
+          console.log('Falha no login');
+        }} />
+  </GoogleOAuthProvider>
+ </DivLogin>
 
         <Text>Ainda não tem uma conta? <Span color="#ec8020" href="/ContaCont">Criar conta</Span></Text>
 </BoxInformation>

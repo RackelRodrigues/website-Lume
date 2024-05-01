@@ -5,6 +5,8 @@ import App from './App.jsx';
 import Login from '../src/pages/Login/Login.jsx';
 import CriarConta2 from '../src/pages/Criarconta/CriarConta2.jsx';
 import CriarConta from '../src/pages/Criarconta/CriarConta.jsx';
+import Books from './pages/Books/books.jsx';
+import ProfileUser from './pages/ProfileUser/Profileuser.jsx';
 import Errorpage from '../src/pages/errorPage/Errorpage.jsx';
 import './index.css';
 import { Provider } from 'react-redux';
@@ -19,7 +21,8 @@ createRoot(document.getElementById('root')).render(
           <Route path="/Login" element={<Login />} />
           <Route path="/CriarConta" element={<CriarConta />} />
           <Route path="/ContaCont" element={<CriarConta2 />} />
-          <Route path="/Errorpage" element={<Errorpage />} />
+          <Route path="/Books" element={<Books />} />
+          <Route path="/pageuser" element={<ProfileUser/>} />
           <Route path="*" element={<Errorpage error={{ message: 'Página não encontrada' }} />} />
        
          

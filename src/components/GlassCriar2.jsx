@@ -4,6 +4,8 @@ import { FaRegEyeSlash } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import  {  GoogleOAuthProvider, GoogleLogin}from '@react-oauth/google' ;
+import { jwtDecode } from "jwt-decode";
 import { useState } from "react";
 import axios from 'axios';
 import UserActionTypes from "../redux/user/action-types";
@@ -50,6 +52,17 @@ const StyledLink = styled(Link)`
  
 `;
 
+
+const DivEmail = styled.div`
+margin-top: 20px;
+width: 400px;
+height: 50px;
+margin-bottom: 20px;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0; 
+`;
 
 
 const Input = styled.input`
@@ -244,7 +257,7 @@ const Glasscriar2 =()=>{
             );
             dispatch({
               type: UserActionTypes.ATUALIZAR_EMAIL,
-              payload: { currentUser: email }
+              payload: {email: email}
             });
             if (response.status === 201 || 200) { 
               navigate("/CriarConta")
@@ -326,7 +339,20 @@ const Glasscriar2 =()=>{
 <BoxFinal>
 
 
-
+<DivEmail>
+        <GoogleOAuthProvider 
+        clientId ="638778227780-jkrvm6jp7af25cdbsm0udlgqirch88qv.apps.googleusercontent.com">
+        <GoogleLogin
+         onSuccess={credentialResponse => { 
+          const decoded = jwtDecode(credentialResponse.credential);
+          console.log(decoded);
+          setEmail(decoded.email);
+        }} 
+        onError={() => { 
+          console.log('Falha no login');
+        }} />
+  </GoogleOAuthProvider>
+ </DivEmail>
 <Button onClick={handleCadastro} type="submit">Avançar</Button>
 
 
