@@ -14,21 +14,18 @@ class Perfil(BaseModel):
     usuario = ForeignKeyField(Usuarios, backref='perfil', field='id')
     nome = CharField(max_length=100)
     nome_usuario = CharField(max_length=8, unique=True)
-<<<<<<< HEAD
     inicial = CharField(max_length=8, unique=True)
-=======
+
 
 class Livros(BaseModel):
     usuario = ForeignKeyField(Usuarios, backref='livros', column_name='usuario_id')
     livro_id = CharField(max_length=100)  # ID do livro na API
+    pagina_atual = IntegerField(default=0)
     lendo = BooleanField(default=False)
     lido = BooleanField(default=False)
     quero_ler = BooleanField(default=False)
     abandonado = BooleanField(default=False)
-<<<<<<< HEAD
->>>>>>> 530c3c739dc12bd43f97fc6ad91cbd2abda74393
-=======
->>>>>>> 530c3c739dc12bd43f97fc6ad91cbd2abda74393
+
 
 class Favoritos(BaseModel):
     id_usuario = ForeignKeyField(Usuarios, backref='favoritos', field='id')
