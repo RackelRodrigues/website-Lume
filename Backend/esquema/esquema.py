@@ -1,6 +1,6 @@
 from peewee import PostgresqlDatabase, Model, CharField, ForeignKeyField, BooleanField, IntegerField
 
-db = PostgresqlDatabase('lume_db', port=5432, user='postgres', password='123456')
+db = PostgresqlDatabase('lume', port=5432, user='postgres', password='152538')
 
 class BaseModel(Model):
     class Meta:
@@ -9,12 +9,14 @@ class BaseModel(Model):
 class Usuarios(BaseModel):
     email = CharField(max_length=255, unique=True, null=False)
     senha = CharField(max_length=250, null=False)
+    is_admin = BooleanField(default=False)
+    is_active = BooleanField(default=True) 
 
 class Perfil(BaseModel):
     usuario = ForeignKeyField(Usuarios, backref='perfil', field='id')
     nome = CharField(max_length=100)
     nome_usuario = CharField(max_length=8, unique=True)
-    inicial = CharField(max_length=8, unique=True)
+    #inicial = CharField(max_length=8, unique=True)
 
 
 class Livros(BaseModel):
