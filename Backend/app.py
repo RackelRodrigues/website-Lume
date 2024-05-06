@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
+from flask import Flask, render_template, redirect, url_for, flash, request, jsonify, session, flash
 import requests
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
@@ -25,7 +25,26 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['SECRET_KEY'] = 'sua_chave_secreta'
 
+
 # Lógica de autenticação
+def validate_registration(email, password, confirm_password):
+    if not email or not password or not confirm_password:
+        return False, "Por favor, preencha todos os campos."
+    
+    if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
+        return False, "E-mail inválido. Por favor, insira um e-mail válido."
+    if len(password) < 8:
+        return False, "A senha deve ter pelo menos 8 caracteres."
+    
+    if not re.search(r'[a-z]', password) or not re.search(r'[A-Z]', password) or not re.search(r'\d', password):
+        return False, "A senha deve conter pelo menos uma letra minúscula, uma letra maiúscula e um dígito."
+    if password != confirm_password:
+        return False, "A senha e a confirmação de senha não correspondem."
+    
+    return True, "Cadastro válido."
+
+
+'''# Lógica de autenticação
 def validate_registration(email, password, confirm_password, name, username):
     if not email or not password or not confirm_password or not name or not username:
         return False, "Por favor, preencha todos os campos."
@@ -45,76 +64,69 @@ def validate_registration(email, password, confirm_password, name, username):
     if password != confirm_password:
         return False, "A senha e a confirmação de senha não correspondem."
     
-    return True, "Cadastro válido."
+    return True, "Cadastro válido."'''
 
 # ROTAS
-@app.route("/cadastro", methods=['POST'])
+@app.route("/cadastro", methods=['GET', 'POST'])
 def cadastro():
-    try:
-        data = request.get_json()
-        email = data.get('email')
-        password= data.get('password')
-        confirm_password = data.get('confirm_password')
+    if request.method == 'POST':
+        email = request.form['email']
+        senha = request.form['password']
+        confirma_senha = request.form['confirm_password']
 
-
-        is_valid, message = validate_registration(email, password, confirm_password)
-        if not is_valid:
-            return jsonify({'message': message}), 400
-        
-
-        if len(email) > 255 or len(password) > 100:
+        # Verificar comprimento do email e senha
+        if len(email) > 255 or len(senha) > 100:
             return jsonify({'message': 'O email deve ter no máximo 255 caracteres e a senha deve ter no máximo 100 caracteres'}), 400
 
-        if password!= confirm_password:
+        if senha != confirma_senha:
             return jsonify({'message': 'A senha e a confirmação de senha não correspondem'}), 400
 
-        is_valid, message = validate_registration(email, password, confirm_password)
+        is_valid, message = validate_registration(email, senha, confirma_senha)
         if not is_valid:
             return jsonify({'message': message}), 400
+        
+        # Verificar se o email já está cadastrado no banco de dados
+        existing_user = Usuarios.get_or_none(email=email)
+        if existing_user:
+            flash('Este email já está sendo usado por outro usuário. Por favor, escolha outro.', 'error')
+            return redirect(url_for('cadastro'))
 
-        hashed_password = generate_password_hash(password)
-        new_user = Usuarios(email=email, password=hashed_password)
+        # Verificar se é o primeiro usuário cadastrado e defini-lo como admin
+        if not Usuarios.select().exists():
+            new_user = Usuarios(email=email, senha=senha, is_admin=True)
+        else:
+            new_user = Usuarios(email=email, senha=senha, is_active=True)
         new_user.save()
 
-        return jsonify({'message': 'Cadastro realizado com sucesso'}), 201
+        return redirect(url_for('criar_perfil'))
+    
+    return render_template('cadastro.html')
 
-    except Exception as e:
-        return jsonify({'message': f"Ocorreu um erro durante o cadastro: {e}"}), 500
 
-
-@app.route("/criar_perfil", methods=['POST'])
+@app.route("/criar_perfil", methods=['GET', 'POST'])
 def criar_perfil():
     if request.method == 'POST':
-        try:
-            data = request.get_json()
-            name = data.get('name')
-            username = data.get('username')
-            email = data.get('email')  
-            inicial = data.get('inicial')
+        # Se a solicitação é POST, significa que um formulário HTML foi enviado
+        name = request.form.get('name')
+        username = request.form.get('username')
         
-            # Verifica se os campos estão preenchidos
-            is_valid, message = validate_registration(email, None, None, name, username)
-            if not is_valid:
-                return jsonify({'message': message}), 400
-            
-            # Verifica se o usuário já existe
-            try:
-                user = Usuarios.get(Usuarios.email == email)
-            except Usuarios.DoesNotExist:
-                return jsonify({'message': 'Usuário não encontrado'}), 404
-            
-            # Cria o perfil
-            new_perfil = Perfil(usuario=user.id, nome=name, nome_usuario=username, inicial=inicial)
-            new_perfil.save()
+        if not name or not username:
+            return jsonify({'message': 'Nome e nome de usuário são obrigatórios'}), 400
+        
+        # Crie uma nova instância do modelo "Perfil"
+        novo_perfil = Perfil(nome=name, nome_usuario=username)
+        
+        # Salve o novo perfil no banco de dados
+        novo_perfil.save()
 
-            return jsonify({'message': 'Perfil criado com sucesso'}), 201
+        return redirect(url_for('first_page'))
 
-        except Exception as e:
-            return jsonify({'message': f"Erro ao criar perfil: {e}"}), 500
+        #return jsonify({'message': 'Perfil criado com sucesso'}), 201
 
-    return jsonify({'error': 'Método não permitido'}), 405
+    # Se a solicitação é GET, renderiza o formulário HTML
+    return render_template('criar_perfil.html')
 
-@app.route('/perfil/inicial/<email>', methods=['GET'])
+'''@app.route('/perfil/inicial/<email>', methods=['GET'])
 def get_inicial(email):
     try:
         usuario = Usuarios.select().where(Usuarios.email == email).get()
@@ -126,32 +138,93 @@ def get_inicial(email):
         return jsonify({'error': 'Perfil não encontrado'}), 404
     except Exception as e:
         return jsonify({'error': f'Erro ao buscar perfil inicial: {str(e)}'}), 500
-    
+    '''
 
-@app.route('/login', methods=['POST'])
+# Rota para login
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        data = request.get_json()
-        email = data.get('email')
-        senha = data.get('senha')
+        email = request.form.get('email')
+        senha = request.form.get('senha')
 
-        # Verifica se o email e a senha estão preenchidos
-        is_valid, message = validate_registration(email, senha)
-        if not is_valid:
-            return jsonify({'error': message}), 400
-
-        # Busca o usuário pelo email
-        user = Usuarios.get_or_none(email=email)
+        user = Usuarios.get_or_none(email=email, senha = senha)
         if user:
-            # Verifica se a senha está correta
-            if check_password_hash(user.senha, senha):
-                return jsonify({'message': 'Login realizado com sucesso'}), 200
+            session['user_id'] = user.id  # Armazena o ID do usuário na sessão
+            if user.is_admin:
+                return redirect(url_for('admin'))
             else:
-                return jsonify({'error': 'Senha inválida'}), 401
+                return redirect(url_for('principal'))
         else:
-            return jsonify({'error': 'Usuário não encontrado'}), 404
+            flash('Usuário não encontrado', 'error')
 
-    return jsonify({'error': 'Método não permitido'}), 405
+    return render_template('login.html')
+
+# Rota para a tela de administração
+@app.route('/admin')
+def admin():
+    if 'user_id' in session:
+        user = Usuarios.get_or_none(id=session['user_id'])
+        if user and user.is_admin:
+            # Garante que sempre haja pelo menos um moderador na lista de usuários
+            moderators = Usuarios.select().where((Usuarios.is_admin == True) & (Usuarios.is_active == True))
+            if moderators.count() == 0:
+                flash('Não há moderadores ativos. Crie um novo moderador.', 'error')
+                return redirect(url_for('cadastro'))
+            
+            # Garante que os moderadores estejam no topo da lista
+            users = list(moderators) + list(Usuarios.select().where((Usuarios.is_admin == False) & (Usuarios.is_active == True)))
+            return render_template('tela_admin.html', users=users)
+    return redirect(url_for('login'))
+
+# Rota para excluir um usuário
+@app.route('/delete_user/<int:user_id>', methods=['POST'])
+def delete_user(user_id):
+    if 'user_id' in session:
+        admin_user = Usuarios.get_or_none(id=session['user_id'], is_admin=True)
+        if admin_user:
+            user_to_delete = Usuarios.get_or_none(id=user_id)
+            if user_to_delete:
+                if user_to_delete.is_admin:
+                    # Verifica se o usuário a ser excluído é um moderador e se há outros moderadores na lista
+                    moderators_count = Usuarios.select().where((Usuarios.is_admin == True) & (Usuarios.is_active == True)).count()
+                    if moderators_count > 1:
+                        user_to_delete.is_active = False  # Desativa o usuário ao invés de excluí-lo
+                        user_to_delete.save()
+                        flash(f'O usuário {user_to_delete.email} foi desativado com sucesso!', 'success')
+                    else:
+                        flash(f'Não é possível excluir o último moderador!', 'error')
+                else:
+                    user_to_delete.is_active = False  # Desativa o usuário ao invés de excluí-lo
+                    user_to_delete.save()
+                    flash(f'O usuário {user_to_delete.email} foi desativado com sucesso!', 'success')
+    return redirect(url_for('admin'))
+
+
+# Rota para tornar um usuário em admin ou remover de admin
+@app.route('/toggle_admin/<int:user_id>', methods=['GET', 'POST'])
+def toggle_admin(user_id):
+    if 'user_id' in session:
+        admin_user = Usuarios.get_or_none(id=session['user_id'], is_admin=True)
+        if admin_user:
+            user_to_toggle = Usuarios.get_or_none(id=user_id)
+            if user_to_toggle:
+                user_to_toggle.is_admin = not user_to_toggle.is_admin
+                user_to_toggle.save()
+                if user_to_toggle.is_admin:
+                    flash(f'O usuário {user_to_toggle.email} agora é um moderador!', 'success')
+                else:
+                    flash(f'O usuário {user_to_toggle.email} não é mais um moderador!', 'success')
+    return redirect(url_for('admin'))
+
+# Rota para a página do painel de usuário
+@app.route('/principal')
+def principal():
+    if 'user_id' in session:
+        user_id = session['user_id']
+        user = Usuarios.get_or_none(id=user_id, is_admin=False)
+        if user:
+            return render_template('principal.html')
+    return redirect(url_for('login'))
 
 @app.route('/detalhes_livro/<livro_id>', methods=['GET'])
 def detalhes_livro(livro_id):
@@ -394,8 +467,8 @@ def progresso_leitura():
 
 
 @app.route('/')
-def home():
-    return 'Página inicial'
+def first_page():
+    return render_template('first_page.html')
 
 if __name__ == "__main__":
     app.run(debug=True)
