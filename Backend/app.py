@@ -47,14 +47,6 @@ def validate_registration(email, password, confirm_password, name, username):
     
     return True, "Cadastro válido."
 
-# Extensões e tamanhos de arquivos aceitos
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-MAX_FILE_SIZE = 10 * 1024 * 1024 # 10 MB
-
-def allowed_file(filename):
-    return '.' in filename and \
-            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 # ROTAS
 @app.route("/cadastro", methods=['POST'])
 def cadastro():
@@ -190,7 +182,7 @@ def detalhes_livro(livro_id):
         return jsonify({'error': f'Erro ao processar a solicitação: {str(e)}'}), 500
 
 
-@app.route('/search-books', methods=['POST'])
+@app.route('/search_books', methods=['POST'])
 def search_books():
    
     data = request.json
@@ -212,8 +204,8 @@ def get_bestsellers():
     data = response.json()
     return jsonify(data)
 
-@app.route('/popular-books', methods=['GET'])
-def get_popular_books():
+@app.route('/popular_books', methods=['GET'])
+def popular_books():
     url = 'https://www.googleapis.com/books/v1/volumes?q=bestsellers+subject:nonfiction&maxResults=7'
     response = requests.get(url)
     data = response.json()
@@ -264,29 +256,30 @@ def cadastrar_livro():
     else:
         return jsonify({'error': 'Falha ao obter informações do livro da API de livros do Google'}), 500
 
-@app.route ('/adicionar_favoritos', methods=['POST'])
+@app.route('/adicionar_favoritos', methods=['POST'])
 def adicionar_favoritos():
     data = request.json
     usuario_id = data.get('usuario_id')
     livro_id = data.get('livro_id')
     avaliacao = data.get('avaliacao', None)
 
-    # Verefica se o usuário e o livro existem
+    # Verifica se o usuário e o livro existem
     if not Usuarios.get_or_none(id=usuario_id):
         return jsonify({'error': 'Usuário não encontrado'}), 404
     if not Livros.get_or_none(id=livro_id):
         return jsonify({'error': 'Livro não encontrado'}), 404
     
-    
     # Adiciona o livro aos favoritos se a avaliação for 5 estrelas
     if avaliacao == 5:
         novo_favorito = Favoritos.create(id_usuario=usuario_id, id_livro=livro_id, avaliacao=avaliacao)
-        return jsonify({'error': 'Livro adicionado aos favoritos com sucesso'}), 200
+        return jsonify({'message': 'Livro adicionado aos favoritos com sucesso'}), 200
+    # conclusão da avaliação
     else:
-        return jsonify({'message': 'Livro não atendeu aos critérios para ser adicionado aos favoritos'}), 200
+        return jsonify({'message': 'Avaliação concluída'}), 200
+
     
 
-@app.route('botao_adicionar_favoritos', methods=['POST'])
+@app.route('/botao_adicionar_favoritos', methods=['POST'])
 def botao_adicionar_favoritos():
     data = request.json
     usuario_id = data.get('usuario_id')
