@@ -1,6 +1,6 @@
 from peewee import PostgresqlDatabase, Model, CharField, ForeignKeyField, BooleanField, IntegerField
 
-db = PostgresqlDatabase('lume', port=5432, user='postgres', password='152538')
+db = PostgresqlDatabase('lume', port=5432, user='postgres', password='123456')
 
 class BaseModel(Model):
     class Meta:
