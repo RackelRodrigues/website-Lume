@@ -145,12 +145,8 @@ def login():
                 flash('Senha inválida', 'error')
         else:
             flash('Usuário não encontrado', 'error')
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-
     
-    return redirect(url_for('home'))
+    
 
 @app.route('/search-books', methods=['POST'])
 def search_books():
@@ -180,10 +176,6 @@ def get_popular_books():
     response = requests.get(url)
     data = response.json()
     return jsonify(data)
-
-=======
-=======
->>>>>>> 530c3c739dc12bd43f97fc6ad91cbd2abda74393
     # Não renderiza o template, apenas trata a requisição POST
     return redirect(url_for('home'))
 
@@ -250,7 +242,7 @@ def adicionar_favoritos():
         return jsonify({'message': 'Livro não atendeu aos critérios para ser adicionado aos favoritos'}), 200
     
 
-@app.route('botao_adicionar_favoritos', methods=['POST'])
+@app.route('/botao_adicionar_favoritos', methods=['POST'])
 def botao_adicionar_favoritos():
     data = request.json
     usuario_id = data.get('usuario_id')
@@ -298,11 +290,6 @@ def remover_livro():
         return jsonify({'error': 'Esse livro não foi adicionado a nenhuma lista'}), 404
     except Exception as e:
         return jsonify({'error': f'Erro ao remover o livro: {str(e)}'}), 500
-<<<<<<< HEAD
->>>>>>> 530c3c739dc12bd43f97fc6ad91cbd2abda74393
-=======
->>>>>>> 530c3c739dc12bd43f97fc6ad91cbd2abda74393
-
 
 @app.route('/')
 def home():
