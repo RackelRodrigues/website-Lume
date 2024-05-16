@@ -12,8 +12,8 @@ import { useNavigate } from "react-router-dom";
 
 const Box = styled.div`
 width: 100%;
-max-width: 650px;
-height: 650px;
+max-width: 550px;
+height: 500px;
 border-radius: 15px;
 background-color: rgba(255, 255, 255, 0.15);
 backdrop-filter:blur(8.5px);
@@ -314,6 +314,7 @@ const GlassCriarConta = () =>{
                     username: nomeusuario,
                     email: currentUser.email,
                     inicial: getInitials(nome),
+                    
                 },
                 {
                     headers: {
@@ -323,25 +324,9 @@ const GlassCriarConta = () =>{
                 }
             );  
 
-            const formData = new FormData();
-           formData.append('foto', foto);
-          
+     
 
-      if (foto) {
-        const formData = new FormData();
-        formData.append('foto', foto);
-
-        const fotoResponse = await axios.post(
-          'http://127.0.0.1:5000/upload',
-          formData,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              'Access-Control-Allow-Origin': 'http://127.0.0.1:5000',
-            },
-          }
-        );
-      }
+        
             console.log("Dados a serem enviados:", {
               name: nome,
               username: nomeusuario,
@@ -356,10 +341,12 @@ const GlassCriarConta = () =>{
               
                 toast.success(response.data.message);
                 navigate("/");
+                
             } else {
                 
                 const errorData = response.data;
                 toast.error(errorData.message);
+               
             }
         } catch (error) {
             console.error(error);
@@ -380,18 +367,7 @@ const GlassCriarConta = () =>{
     <BoxHead>
       <Titulo>Criar um perfil</Titulo>
 
-      <FotoDiv>
-      <InputFoto type="file" accept="image/*" onChange={handleFotoChange} />
-       {fotoPreview ? (
-          <PreviaFoto>
-            <ImgFoto src={fotoPreview} alt="Preview da foto" style={{ maxWidth: "200px", maxHeight: "200px" }}/>
-          </PreviaFoto>
-        ) : (
-          <Span>
-            <StyledIcon size={125} />
-          </Span>
-        )}
- </FotoDiv>
+    
  </BoxHead>
  <BoxCenter>
 <Boxinputs>

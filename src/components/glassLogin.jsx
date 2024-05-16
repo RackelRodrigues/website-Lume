@@ -4,7 +4,12 @@ import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 import  {  GoogleOAuthProvider, GoogleLogin   }from '@react-oauth/google' ;
+
 import { jwtDecode } from "jwt-decode";
+import UserActionTypes from "../redux/user/action-types";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useDispatch } from "react-redux";
 import { useState } from "react";
 import axios from 'axios';
 
@@ -55,7 +60,7 @@ width: 400px;
 height: 45px;
 color: #000;
 background-color: #C084FC;
-border-radius: 30px;
+border-radius: 15px;
 border: 0;
 outline: none;
 margin-top:  30px;
@@ -205,8 +210,11 @@ const GlassLogin = () => {
         const [senha, setSenha] = useState('');
         const [showPassword, setShowPassword] = useState(false);
         const [rememberMe, setRememberMe] = useState(false);
-        const togglePasswordVisibility = () => {
-                setShowPassword(prev => !prev);
+        const dispatch = useDispatch();
+
+        const PasswordVisibility = (e) => {
+          e.preventDefault();
+          setShowPassword(prev => !prev);
         };
 
         const [showInputs, setShowInputs] = useState(false);
@@ -224,28 +232,27 @@ const GlassLogin = () => {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': 'http://127.0.0.1:5000/login'
               }
+              
             });
-        
-            if (response.status === 200) {
-              window.location.href = '/';
-            } else {
-              alert('Erro ao fazer login. Por favor, tente novamente.');
-            }
+          
+            dispatch({
+              type: UserActionTypes.ATUALIZAR_EMAIL,
+              payload: {email: email}
+            });
+            if (response.status === 302) {
+              toast.success('Login realizado com sucesso!');
+              setTimeout(() => {
+                window.location.href = '/';
+              }, 2000);
+            } 
           } catch (error) {
-            if (error.response.status === 302) {
-              const redirectUrl = error.response.headers.location;
-              if (redirectUrl) {
-                window.location.href = redirectUrl; 
-              }
-            } else {
-              console.error(error);
-              alert('Erro ao fazer login. Por favor, tente novamente.');
-            }
+            toast.error('Erro ao fazer login. Por favor, tente novamente.');
           }
         };
         
     return (
         <>
+        <ToastContainer/>
         <Box>
         <Form onSubmit={handleSubmit}>
         <ContainerTitulo>
@@ -273,10 +280,11 @@ const GlassLogin = () => {
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
         />
-        <ToggleButton onClick={togglePasswordVisibility}>
+         <ToggleButton  onClick={(e) => PasswordVisibility(e)}>
                 {showPassword ? <FaRegEye size={20}/> : <FaRegEyeSlash  size={20}/>}
               </ToggleButton>
               
+
         </ContainerInput>
         </Boxinputs>
 </BoxCenter>

@@ -243,7 +243,7 @@ const Glasscriar2 =()=>{
               'http://127.0.0.1:5000/cadastro',
               {
                 email: email,
-                senha: senha,
+                password: senha,
                 confirm_password: confirme,
               },
               {
@@ -275,7 +275,6 @@ const Glasscriar2 =()=>{
             }
           } catch (error) {
             console.error(error);
-
             toast.error("Erro ao cadastrar. Por favor, tente novamente.");
 
           }

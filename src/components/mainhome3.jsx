@@ -113,7 +113,7 @@ const MainHome3 =()=>{
        <Imgperson src='https://i.ibb.co/pR871HG/nega.jpg' alt='pessoas fotos'/>
        <Name>Dandara</Name>
        <Text>comentou</Text>
-       <Coment>Anne de Green Gables</Coment>
+       <Coment>Anne de Avonlea</Coment>
         </Conteinerheader>
          <PiQuotes size={25} color='#D0A460' style={{ transform: 'rotate(180deg)' }}/> 
         <IconWrapper>

@@ -162,9 +162,10 @@ align-items: center;
 `;
 
 const Header = () =>{
-  const { currentNome } = useSelector((rootReducer) => rootReducer.userReducer);
+  
   const { currentUser } = useSelector((rootReducer) => rootReducer.userReducer);
   const [initial, setInitial] = useState('');
+  const [primeiro_nome, setprimeiro_nome] = useState('');
   const [showDivNamed, setShowDivNamed] = useState(() => {
     const storedShowDivNamed = localStorage.getItem('showDivNamed');
     return storedShowDivNamed ? JSON.parse(storedShowDivNamed) : false;
@@ -176,9 +177,9 @@ const Header = () =>{
       try {
         const response = await axios.get(`http://127.0.0.1:5000/perfil/inicial/${currentUser.email}`);
         setInitial(response.data.inicial);
-        console.log(initial);
-        console.log(response.data.inicial)
-        setShowDivNamed(true);
+        setprimeiro_nome(response.data.primeiro_nome);
+        console.log(response.data)
+        
         localStorage.setItem('showDivNamed', JSON.stringify(true));
       } catch (error) {
         console.error('Erro ao buscar perfil inicial:', error);
@@ -229,8 +230,9 @@ return(
         <ButtonLogin>
   
         
-        <DivNamed bgColor={color}>{initial}</DivNamed>
-        Ola,
+        <DivNamed as={Link} to="/pageuser"
+        bgColor={color}>{initial}</DivNamed>
+        Ola,{primeiro_nome}
         </ButtonLogin>
       ) : (
         <Button as={Link} to="/Login">

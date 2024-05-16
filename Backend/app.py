@@ -7,20 +7,20 @@ from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
 from peewee import DoesNotExist
 from werkzeug.utils import secure_filename
-from esquema.esquema import Usuarios, Livros, Perfil, Favoritos
+from esquema.esquema import *
 import os, re
 import requests
 from flask_cors import CORS
 
 
-# Definição da classe formulário
+
 class CadastroForm(FlaskForm):
     email = StringField('email', validators=[DataRequired(), Email()])
     password = PasswordField('password', validators=[DataRequired()])
     confirm_password = PasswordField('confirm_password', validators=[DataRequired(), EqualTo('password')])
     
 
-# Criação da instância Flask
+
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['SECRET_KEY'] = 'sua_chave_secreta'
@@ -42,15 +42,8 @@ def validate_registration(email, password, confirm_password):
     
     return True, "Cadastro válido."
 
-# Extensões e tamanhos de arquivos aceitos
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-MAX_FILE_SIZE = 10 * 1024 * 1024 # 10 MB
 
-def allowed_file(filename):
-    return '.' in filename and \
-            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# ROTAS
 @app.route("/cadastro", methods=['POST'])
 def cadastro():
     try:
@@ -119,14 +112,15 @@ def get_inicial(email):
     try:
         usuario = Usuarios.select().where(Usuarios.email == email).get()
         perfil = Perfil.select().where(Perfil.usuario == usuario.id).get()
-        return jsonify({'inicial': perfil.inicial, 'primeiro_nome': usuarios.nome_usuario.split()[0]})
+        primeiro_nome = perfil.nome.split()[0]  
+        return jsonify({'inicial': perfil.inicial, 'primeiro_nome': primeiro_nome})
     except Usuarios.DoesNotExist:
         return jsonify({'error': 'Usuário não encontrado'}), 404
     except Perfil.DoesNotExist:
         return jsonify({'error': 'Perfil não encontrado'}), 404
     except Exception as e:
         return jsonify({'error': f'Erro ao buscar perfil inicial: {str(e)}'}), 500
-#Não precisa mexer eu já criei a rota
+    
 @app.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
@@ -146,6 +140,8 @@ def login():
         else:
             flash('Usuário não encontrado', 'error')
     
+    # Retorno padrão caso não seja feito o redirecionamento
+    return jsonify({'message': 'Erro ao fazer login'}), 401
     
 
 @app.route('/search-books', methods=['POST'])
@@ -165,7 +161,7 @@ def search_books():
 
 @app.route('/bestsellers',methods=['GET'])
 def get_bestsellers():
-    url = 'https://www.googleapis.com/books/v1/volumes?q=bestsellers&maxResults=7'
+    url = 'https://www.googleapis.com/books/v1/volumes?q=bestsellers'
     response = requests.get(url)
     data = response.json()
     return jsonify(data)
@@ -176,120 +172,112 @@ def get_popular_books():
     response = requests.get(url)
     data = response.json()
     return jsonify(data)
-    # Não renderiza o template, apenas trata a requisição POST
-    return redirect(url_for('home'))
+#adicionar ao lista quero ler
 
-@app.route('/cadastrar_livro', methods=['POST'])
-def cadastrar_livro():
-
+@app.route('/adicionar_quero_ler', methods=['POST'])
+def adicionar_quero_ler():
     data = request.json
-    titulo = data.get('titulo')
-    autor = data.get('autor')
-    isbn = data.get('isbn') # identificador único para livros, nº de 13 dígitos
-    usuario_id = data.get('usuario_id')
-
-    # Construir a URL de pesquisa na API
-    url = 'https://www.googleapis.com/books/v1/volumes?q='
-
-    if titulo:
-        url += f'intitle:{titulo}+'
-    if autor:
-        url += f'inauthor:{autor}+'
-    if isbn:
-        url += f'isbn:{isbn}'
-
-    # Fazer a solicitação à API de livros do Google
-    response = requests.get(url)
-
-    if response.status_code == 200:
-        # Extrair os detalhes do livro da resposta da API
-        livro_info = response.json()
-
-        #  Detalhes relevantes do livro e cadastrar no banco de dados
-        titulo = livro_info.get('title', '')
-        autor = ', '.join(livro_info.get('authors', []))
-        sinopse = livro_info.get('description', '')
-
-
-        # Adiciona os detalhes extraídos do livro ao banco de dados
-        novo_livro = Livros(usuario_id=usuario_id, livro_id=isbn, status='', titulo=titulo, autor=autor, sinopse=sinopse)
-        novo_livro.save()
-
-        return jsonify({'message': 'Livro cadastrado com sucesso'}), 200
-    else:
-        return jsonify({'error': 'Falha ao obter informações do livro da API de livros do Google'}), 500
-   
-    
-@app.route ('/adicionar_favoritos', methods=['POST'])
-def adicionar_favoritos():
-    data = request.json
-    usuario_id = data.get('usuario_id')
+    email = data.get('email')
     livro_id = data.get('livro_id')
-    avaliacao = data.get('avaliacao', None)
-
-    # Verefica se o usuário e o livro existem
-    if not Usuarios.get_or_none(id=usuario_id):
-        return jsonify({'error': 'Usuário não encontrado'}), 404
-    if not Livros.get_or_none(id=livro_id):
-        return jsonify({'error': 'Livro não encontrado'}), 404
-    
-    
-    # Adiciona o livro aos favoritos se a avaliação for 5 estrelas
-    if avaliacao == 5:
-        novo_favorito = Favoritos.create(id_usuario=usuario_id, id_livro=livro_id, avaliacao=avaliacao)
-        return jsonify({'error': 'Livro adicionado aos favoritos com sucesso'}), 200
-    else:
-        return jsonify({'message': 'Livro não atendeu aos critérios para ser adicionado aos favoritos'}), 200
-    
-
-@app.route('/botao_adicionar_favoritos', methods=['POST'])
-def botao_adicionar_favoritos():
-    data = request.json
-    usuario_id = data.get('usuario_id')
-    livro_id = data.get('livro_id')
-
-    # Verifica se o usuário e o livro existem
-    if not Usuarios.get_or_none(id=usuario_id):
-        return jsonify({'error': 'Usuário não encontrado'}), 404
-    if not Livros.get_or_none(id=livro_id):
-        return jsonify({'error': 'Livro não encontrado'}), 404
-
-    # Adiciona o livro aos favoritos diretamente
-    novo_favorito = Favoritos.create(id_usuario=usuario_id, id_livro=livro_id, classificacao=5)
-    return jsonify({'message': 'Livro adicionado diretamente aos favoritos com sucesso'}), 200
-
-@app.route('/remover_livro', methods=['POST'])
-def remover_livro():
-    data = request.json
-    livro_id = data.get('livro_id')
-    usuario_id = data.get('usuario_id')
-    status_leitura = data.get('status_leitura')
 
     try:
-        livro = Livros.get(Livros.id == livro_id, Livros.usuario_id == usuario_id)
-        if livro:
-            # Verifique o status de leitura do livro
-            if status_leitura == 'lendo':
-                livro.lendo = False
-            elif status_leitura == 'lido':
-                livro.lido = False
-            elif status_leitura == 'quero_ler':
-                livro.quero_ler = False
-            elif status_leitura == 'abandonei':
-                livro.abandonei = False
-            else:
-                return jsonify({'error': 'Status de leitura inválido'}), 400
-            
-            # Salvar as alterações no banco de dados
-            livro.save()
-            
-            return jsonify({'message': 'Livro removido com sucesso'}), 200
-        else:
-            return jsonify({'error': 'Esse livro não foi adicionado a nenhuma lista'}), 404
-    except Livros.DoesNotExist:
-        return jsonify({'error': 'Esse livro não foi adicionado a nenhuma lista'}), 404
+        usuario = Usuarios.get(Usuarios.email == email)
+        livro_quero_ler = LivroQueroLer.create(usuario=usuario, livro_id=livro_id)
+        return jsonify({'message': 'Livro adicionado à lista "Quero Ler" com sucesso.'}), 200
+    except Usuarios.DoesNotExist:
+        return jsonify({'error': 'Usuário não encontrado.'}), 404
     except Exception as e:
-        return jsonify({'error': f'Erro ao remover o livro: {str(e)}'}), 500
+        return jsonify({'error': str(e)}), 500
+   
+#rota para adicionar ao lendo
+@app.route('/adicionar_lendo', methods=['POST'])
+def adicionar_lendo():
+    data = request.json
+    email = data.get('email')
+    livro_id = data.get('livro_id')
+
+    try:
+        usuario = Usuarios.get(Usuarios.email == email)
+        livro_lendo = LivroLendo.create(usuario=usuario, livro_id=livro_id)
+        return jsonify({'message': 'Livro adicionado à lista "Lendo" com sucesso.'}), 200
+    except Usuarios.DoesNotExist:
+        return jsonify({'error': 'Usuário não encontrado.'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+
+#rota para colocar na lisat de abandonei     
+@app.route('/adicionar_abandonei', methods=['POST'])
+def adicionar_abandonei():
+    data = request.json
+    email = data.get('email')
+    livro_id = data.get('livro_id')
+
+    try:
+        usuario = Usuarios.get(Usuarios.email == email)
+        livro_abandonei = LivroAbandonado.create(usuario=usuario, livro_id=livro_id)
+        return jsonify({'message': 'Livro adicionado à lista "Abandonei" com sucesso.'}), 200
+    except Usuarios.DoesNotExist:
+        return jsonify({'error': 'Usuário não encontrado.'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/adicionar_ja_li', methods=['POST'])
+def adicionar_ja_li():
+    data = request.json
+    email = data.get('email')
+    livro_id = data.get('livro_id')
+
+    try:
+        usuario = Usuarios.get(Usuarios.email == email)
+        livro_ja_li = LivroJaLi.create(usuario=usuario, livro_id=livro_id)
+        return jsonify({'message': 'Livro adicionado à lista "Já Li" com sucesso.'}), 200
+    except Usuarios.DoesNotExist:
+        return jsonify({'error': 'Usuário não encontrado.'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+    
+@app.route('/adicionar_favorito', methods=['POST'])
+def adicionar_favorito():
+    data = request.json
+    email = data.get('email')
+    livro_id = data.get('livro_id')
+    avaliacao = data.get('avaliacao')
+
+    try:
+        usuario = Usuarios.get(Usuarios.email == email)
+        favorito = Favoritos.create(id_usuario=usuario, livro_id=livro_id, avaliacao=avaliacao)
+        return jsonify({'message': 'Livro adicionado aos favoritos com sucesso.'}), 200
+    except Usuarios.DoesNotExist:
+        return jsonify({'error': 'Usuário não encontrado.'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/book-details/<book_id>')
+def get_book_details(book_id):
+    try:
+        
+        base_url = 'https://www.googleapis.com/books/v1/volumes/'
+
+       
+        url = base_url + book_id
+
+       
+        response = requests.get(url)
+
+       
+        if response.status_code == 200:
+            
+            return jsonify(response.json())
+        else:
+          
+            return jsonify({'error': 'Falha ao obter detalhes do livro'}), response.status_code
+    except Exception as e:
+       
+        return jsonify({'error': 'Erro ao processar a requisição'}), 500
+
 
 @app.route('/')
 def home():

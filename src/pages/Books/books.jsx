@@ -7,8 +7,11 @@ import { CiBookmark } from "react-icons/ci";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { CiStar } from "react-icons/ci";
 import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import IDActionTypes from "../../redux/idbook/action-types";
 import axios from "axios";
 import ContainerList from "../../components/ContainerList";
+import { useNavigate } from "react-router-dom";
 
 
 const Background = styled.div`
@@ -95,7 +98,7 @@ const Line = styled.span`
 const ImgBook = styled.img`
 width: 150px;
 height: 220px;
-
+cursor: pointer;
 `;
 
 const TitleBook = styled.h2`
@@ -131,7 +134,6 @@ margin-left: 20px;
 `;
 
 const Containergrid = styled.div`
-
 display: flex;
 flex-direction: row;
 align-items: center;
@@ -139,7 +141,6 @@ align-items: center;
 `;
 
 const ContainerMain = styled.div`
-
 display: grid;
 grid-template-columns: 2fr 1fr; 
 gap: 20px;
@@ -158,6 +159,10 @@ const Books =()=>{
    const [query, setQuery] = useState('');
    const [results, setResults] = useState([]);
    const [showList, setShowList] = useState(true);
+   const Navigate = useNavigate();
+   const dispatch = useDispatch();
+
+
 
    const handleSearch = async () => {
     try {
@@ -169,6 +174,16 @@ const Books =()=>{
     } catch (error) {
         console.error('Erro ao buscar livros:', error);
     }
+};
+
+const handleBookClick = (bookId) => {
+  dispatch({
+    type: IDActionTypes.ATUALIZAR_ID,
+    payload: {ID: bookId}
+  }) 
+
+  Navigate('/Detailbook');
+  console.log('ID do livro:', bookId);
 };
 
     return(
@@ -195,11 +210,14 @@ const Books =()=>{
     <ContainerMain>
       <Containergrid> 
         {book.volumeInfo.imageLinks && book.volumeInfo.imageLinks.thumbnail && (
-          <ImgBook src={book.volumeInfo.imageLinks.thumbnail} alt="Capa do Livro" />
+          <ImgBook src={book.volumeInfo.imageLinks.thumbnail} 
+          alt="Capa do Livro" 
+          onClick={() => handleBookClick(book.id)}
+          />
         )}
         <Containerinformation>
           <TitleBook>{book.volumeInfo.title}</TitleBook>
-          <Nameautor>{book.volumeInfo.authors.join(', ')}</Nameautor>
+          <Nameautor>{book.volumeInfo.authors ? book.volumeInfo.authors.join(', ') : 'Autor Desconhecido'}</Nameautor>
           <Information>Ano: {book.volumeInfo.publishedDate}</Information>
           <Information>Páginas: {book.volumeInfo.pageCount}</Information>
         </Containerinformation>

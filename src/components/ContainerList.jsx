@@ -6,6 +6,9 @@ import { HiOutlineBookOpen } from "react-icons/hi2";
 import { CiBookmark } from "react-icons/ci";
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
+import { useDispatch } from "react-redux";
+import IDActionTypes from "../redux/idbook/action-types";
+import { useNavigate } from "react-router-dom";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { CiStar } from "react-icons/ci";
 
@@ -105,6 +108,9 @@ const ContainerList = ()=>{
   const [booksbest, setBooksbest] = useState([]);
   const [bookpopular, setBookPopular ]= useState([])
   const [loading, setLoading] = useState(true);
+  const [showAll, setShowAll] = useState(false);
+  const Navigate = useNavigate();
+  const dispatch = useDispatch();
   useEffect(() => {
     async function fetchBooks() {
       try {
@@ -123,31 +129,106 @@ const ContainerList = ()=>{
       try {
         const response = await axios.get('http://localhost:5000/popular-books');
         setBookPopular(response.data.items);
+        setLoading(false);
       } catch (error) {
         console.error('Erro ao buscar livros:', error);
       }
     }
     fetchBooksPopular();
   }, []);
+
+  
+  const handleShowAll = () => {
+    setShowAll(true);
+  };
+
+
+const handleBookClick = (bookId) => {
+  dispatch({
+    type: IDActionTypes.ATUALIZAR_ID,
+    payload: {ID: bookId}
+  }) 
+
+  Navigate('/Detailbook');
+  console.log('ID do livro:', bookId);
+};
+
+
+
+const adicionarQueroLer = async () => {
+  try {
+    const response = await axios.post('http://localhost:5000/adicionar_quero_ler', {
+      email: "RAkdepr@gmail.com", 
+      livro_id: currentID.ID 
+    });
+    toast.success('adicionado ao Quero Ler');
+  } catch (error) {
+    toast.error('Erro ao Adicionar. Por favor, tente novamente.');
+  }
+};
+
+
+
+const adicionarLendo = async () => {
+  try {
+    const response = await axios.post('http://localhost:5000/adicionar_lendo', {
+      email: currentUser.email,
+      livro_id: currentID.ID
+    });
+    toast.success('Adicionado ao Lendo');
+  } catch (error) {
+    toast.error('Erro ao Adicionar. Por favor, tente novamente.');
+  }
+};
+
+
+const adicionarAbandonei = async () => {
+  try {
+    const response = await axios.post('http://localhost:5000/adicionar_abandonei', {
+      email: currentUser.email, 
+      livro_id: currentID.ID
+    });
+    toast.success('Adicionado ao Abandonei');
+  } catch (error) {
+    toast.error('Erro ao Adicionar. Por favor, tente novamente.');
+  }
+};
+
+
+const adicionarjaLi = async () => {
+  try {
+    const response = await axios.post('http://localhost:5000/adicionar_ja_li', {
+      email: currentUser.email,
+      livro_id: currentID.ID
+    });
+    toast.success('Adicionado ao Já li');
+  } catch (error) {
+    toast.error('Erro ao Adicionar. Por favor, tente novamente.');
+  }
+};
+
     return(
     <>
     <Center>
     {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '75vw'}}>
-            <CircularProgress />
+            <CircularProgress  style={{ color: '#C084FC' }}/>
           </Box>
         ) : (
         <>
    <Boxlist>
     <TitleList>Bestsellers</TitleList>
-    <VerMais>Ver mais</VerMais>
+    <VerMais onClick={handleShowAll}>Ver mais</VerMais>
     </Boxlist>
     <Line/>
     <ContainerCenter>
     {booksbest && booksbest.map((book) => (
   <ContainerBook key={book.id}>
    {book.volumeInfo.imageLinks && book.volumeInfo.imageLinks.thumbnail ? (
-  <ImgBook src={book.volumeInfo.imageLinks.thumbnail} alt="capa livro" />
+  <ImgBook src={book.volumeInfo.imageLinks.thumbnail} 
+  alt="capa livro" 
+  onClick={() => handleBookClick(book.id)}
+  />
 ) : (
   <ImgBook src="https://i.ibb.co/3z2whnm/image.png" alt="imagem não disponível" />
 )}
@@ -181,7 +262,10 @@ const ContainerList = ()=>{
     {bookpopular && bookpopular.map((bookP) => (
   <ContainerBook key={bookP.id}>
    {bookP.volumeInfo.imageLinks && bookP.volumeInfo.imageLinks.thumbnail ? (
-  <ImgBook src={bookP.volumeInfo.imageLinks.thumbnail} alt="capa livro" />
+  <ImgBook src={bookP.volumeInfo.imageLinks.thumbnail} 
+  alt={bookP.title} 
+  onClick={() => handleBookClick(bookP.id)}
+  />
 ) : (
   <ImgBook src="https://i.ibb.co/3z2whnm/image.png" alt="imagem não disponível" />
 )}
