@@ -160,7 +160,7 @@ const adicionarQueroLer = async () => {
 const adicionarLendo = async () => {
   try {
     const response = await axios.post('http://localhost:5000/adicionar_lendo', {
-      email: currentUser.email,
+      email: "higooli@gmail.com",
       livro_id: currentID.ID
     });
     toast.success('Adicionado ao Lendo');
@@ -214,7 +214,7 @@ return (
               <ButtonSvg onClick={adicionarQueroLer}>
                 <HiOutlineBookOpen size={30} color="#A3B1A9" />
               </ButtonSvg>
-              <ButtonSvg>
+              <ButtonSvg onClick={adicionarLendo}>
                 <PiBooksLight size={30} color="#A3B1A9" />
               </ButtonSvg>
               <ButtonSvg>
