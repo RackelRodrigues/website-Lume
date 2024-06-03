@@ -5,6 +5,7 @@ from peewee import PostgresqlDatabase, Model, CharField, ForeignKeyField, Boolea
 db = PostgresqlDatabase('lumedb', port=5432, user='postgres', password='875838')
 #db = PostgresqlDatabase('lume_db', port=5432, user='postgres', password='123456')
 
+
 class BaseModel(Model):
     class Meta:
         database = db
@@ -12,6 +13,8 @@ class BaseModel(Model):
 class Usuarios(BaseModel):
     email = CharField(max_length=255, unique=True, null=False)
     senha = CharField(max_length=250, null=False)
+    is_admin = BooleanField(default=False)
+    is_active = BooleanField(default=True) 
 
 class Perfil(BaseModel):
     usuario = ForeignKeyField(Usuarios, backref='perfil', field='id')
@@ -35,6 +38,7 @@ class LivroJaLi(BaseModel):
     usuario = ForeignKeyField(Usuarios, backref='livros_ja_li', column_name='usuario_id')
     livro_id = CharField()
 
+    #inicial = CharField(max_length=8, unique=True)
 
 class Favoritos(BaseModel):
     id_usuario = ForeignKeyField(Usuarios, backref='favoritos', field='id')
