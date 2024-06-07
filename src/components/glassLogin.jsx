@@ -223,7 +223,7 @@ const GlassLogin = () => {
           e.preventDefault();
         
           try {
-            const response = await axios.post('http://127.0.0.1:5000/login', {
+            const response = await axios.post('http://localhost:5000/login', {
               email: email,
               senha: senha,
             }, {
@@ -239,8 +239,14 @@ const GlassLogin = () => {
               type: UserActionTypes.ATUALIZAR_EMAIL,
               payload: {email: email}
             });
-            if (response.status === 302) {
+            if (response.status === 302 || 200) {
               toast.success('Login realizado com sucesso!');
+              const { access_token } = response.data;
+              document.cookie = `access_token=${access_token}; Secure; SameSite=None`;
+
+       // Salva o token no localStorage
+           localStorage.setItem('access_token', access_token);
+
               setTimeout(() => {
                 window.location.href = '/';
               }, 2000);

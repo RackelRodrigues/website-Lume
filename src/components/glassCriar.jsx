@@ -339,7 +339,7 @@ const GlassCriarConta = () =>{
             if (response.status === 201 || 200) {
               
                 toast.success(response.data.message);
-                navigate("/");
+                navigate("/login");
                 
             } else {
                 

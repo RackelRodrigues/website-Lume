@@ -2,6 +2,8 @@ import { FaArrowLeft } from "react-icons/fa6";
 import { PiHouse } from "react-icons/pi";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import styled from "styled-components";
 
 
@@ -120,6 +122,30 @@ cursor: pointer;
 
 const AdminScreen = () =>{
 
+    const [users, setUsers] = useState([]);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const response = await axios.get('http://localhost:5000/admin', {
+                   
+                    headers: {
+                        withCredentials: true,
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': 'http://localhost:5000/admin',
+                    }
+                });
+                document.cookie = `access_token=${access_token}; Secure; SameSite=None`;
+                setUsers(response.data.users);
+            } catch (error) {
+                console.error('Error fetching users:', error);
+                // Handle error
+            }
+        };
+        fetchUsers();
+    }, []);
+
     const navegate = useNavigate();
     const handletoBack = () => {
         navegate('/login')
@@ -142,52 +168,21 @@ const AdminScreen = () =>{
        
             <Titulo>Gerenciamento de Admin</Titulo>
             <Conteiner>
-         
-                <NameEmail color="#C084FC">exemplo12233@gmail.com</NameEmail>
-        
-                  <ConteinerButtons>
-                    <ButtonDelete>
-                    <FaRegTrashCan size={20} color="#000"/>
-                    Excluir
-                </ButtonDelete>
-                <ButtonAdmin>Tornar Admin</ButtonAdmin>
-                </ConteinerButtons>
-            </Conteiner>
-            <Conteiner>
-       
-                <NameEmail color="#C084FC">exemplo12233@gmail.com</NameEmail>
-                
-                <ConteinerButtons>
-                  <ButtonDelete>
-                  <FaRegTrashCan size={20} color="#000"/>
-                  Excluir
-              </ButtonDelete>
-              <ButtonAdmin>Tornar Admin</ButtonAdmin>
-              </ConteinerButtons>
-          </Conteiner>
-          <Conteiner>
-         
-                <NameEmail color="#C084FC">exemplo12233@gmail.com</NameEmail>
-           
-                <ConteinerButtons>
-                  <ButtonDelete>
-                  <FaRegTrashCan size={20} color="#000"/>
-                  Excluir
-              </ButtonDelete>
-              <ButtonAdmin>Tornar Admin</ButtonAdmin>
-              </ConteinerButtons>
-          </Conteiner>
-          <Conteiner>
-                <NameEmail color="#C084FC">exemplo12233@gmail.com</NameEmail>
-          
-                <ConteinerButtons>
-                  <ButtonDelete>
-                  <FaRegTrashCan size={20} color="#000"/>
-                  Excluir
-              </ButtonDelete>
-              <ButtonAdmin>Tornar Admin</ButtonAdmin>
-              </ConteinerButtons>
-          </Conteiner>
+                    {users.map(user => (
+                        <div key={user.email}>
+                            <NameEmail color="#C084FC">{user.email}</NameEmail>
+                            <ConteinerButtons>
+                                <ButtonDelete onClick={() => handleDeleteUser(user.email)}>
+                                    <FaRegTrashCan size={20} color="#000" />
+                                    Excluir
+                                </ButtonDelete>
+                                <ButtonAdmin onClick={() => handleToggleAdmin(user.email, user.is_admin)}>
+                                    {user.is_admin ? 'Remover Admin' : 'Tornar Admin'}
+                                </ButtonAdmin>
+                            </ConteinerButtons>
+                        </div>
+                    ))}
+                    </Conteiner>
         </Background>
         </>
     )

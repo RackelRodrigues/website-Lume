@@ -130,7 +130,9 @@ const DetailBook = ()=>{
     try {
       const response = await axios.get(`http://localhost:5000/book-details/${currentID.ID}`);
        setBookDetails(response.data);
+
        setLoading(false);
+       
     } catch (error) {
       console.error('Erro ao obter detalhes do livro:', error);
       return null;
@@ -144,18 +146,30 @@ const DetailBook = ()=>{
 
 const { currentUser } = useSelector((rootReducer) => rootReducer.userReducer); 
  
+const token = localStorage.getItem('token');
+
 const adicionarQueroLer = async () => {
   try {
-    const response = await axios.post('http://localhost:5000/adicionar_quero_ler', {
-      email: currentUser.email, 
-      livro_id: currentID.ID 
+    console.log(currentID.ID)
+    const response = await axios.post(`http://localhost:5000/adicionar_quero_ler/F4JzCwAAQBAJ`, {
+    }, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
     });
-    toast.success('adicionado ao Quero Ler');
+
+    document.cookie = `access_token=${token}; Secure; SameSite=None`;
+    
+    if (response.status === 200) {
+      toast.success('Adicionado ao Quero Ler');
+    } else {
+      toast.error('Erro ao Adicionar. Por favor, tente novamente.');
+    }
   } catch (error) {
     toast.error('Erro ao Adicionar. Por favor, tente novamente.');
   }
 };
-
 
 
 const adicionarLendo = async () => {
@@ -212,18 +226,19 @@ return (
           <Boxtext>
             <Book src={bookDetails?.volumeInfo?.imageLinks?.thumbnail} alt={bookDetails?.volumeInfo?.title} />
             <ContainerSvg>
-              <ButtonSvg onClick={adicionarQueroLer}>
+              <ButtonSvg onClick={adicionarLendo}>
                 <HiOutlineBookOpen size={30} color="#A3B1A9" />
               </ButtonSvg>
-              <ButtonSvg onClick={adicionarLendo}>
+              <ButtonSvg onClick={adicionarQueroLer}>
                 <PiBooksLight size={30} color="#A3B1A9" />
               </ButtonSvg>
-              <ButtonSvg>
+              <ButtonSvg nClick={adicionarjaLi}>
                 <CiBookmark size={30} color="#A3B1A9" />
               </ButtonSvg>
-              <ButtonSvg>
+              <ButtonSvg onClick={adicionarAbandonei}>
                 <IoIosCloseCircleOutline size={30} color="#A3B1A9" />
               </ButtonSvg>
+
               <ButtonSvg>
                 <CiStar size={30} color="#A3B1A9" />
               </ButtonSvg>

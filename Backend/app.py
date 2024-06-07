@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, request, jsonify, session, flash
+from flask import Flask, render_template, make_response,redirect, url_for, flash, request, jsonify, session, flash
 import requests
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
@@ -6,7 +6,10 @@ from wtforms.validators import DataRequired, Email, EqualTo
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
 from peewee import DoesNotExist
+from functools import wraps
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
+from playhouse.shortcuts import model_to_dict
 from esquema.esquema import *
 import os, re
 import requests
@@ -23,8 +26,8 @@ class CadastroForm(FlaskForm):
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
-app.config['SECRET_KEY'] = 'sua_chave_secreta'
-
+app.config['SECRET_KEY'] = 'aP34!eK@82&dO39s#BzLxG$wMpt^Qd%yZfHk!1JpN3q&UwFv'
+jwt = JWTManager(app)
 
 # Lógica de autenticação
 def validate_registration(email, password, confirm_password, is_active, is_admin):
@@ -54,6 +57,7 @@ def cadastro():
         confirma_senha = data['confirm_password']
         is_admin = data['is_admin']
         is_active = data['is_active']
+        
         # Verificar comprimento do email e senha
         if len(email) > 255 or len(senha) > 100:
             return jsonify({'message': 'O email deve ter no máximo 255 caracteres e a senha deve ter no máximo 100 caracteres'}), 400
@@ -70,14 +74,18 @@ def cadastro():
         if existing_user:
             return jsonify({'message': 'Este email já está sendo usado por outro usuário. Por favor, escolha outro.'}), 400
 
-        
-        if not Usuarios.select().exists():
-            new_user = Usuarios(email=email, senha=senha, is_admin=True)
-        else:
-            new_user = Usuarios(email=email, senha=senha, is_active=True)
+        # Criar novo usuário
+        new_user = Usuarios(email=email, senha=senha, is_admin=is_admin, is_active=is_active)
         new_user.save()
 
-        return jsonify({'message': 'Usuário cadastrado com sucesso!'}), 201
+        # Gerar token de acesso
+        access_token = create_access_token(identity=new_user.id)
+
+        # Atualizar o usuário com o token de acesso
+        new_user.access_token = access_token
+        new_user.save()
+
+        return jsonify({'message': 'Usuário cadastrado com sucesso!', 'access_token': access_token}), 201
     
     return jsonify({'message': 'Método não permitido'}), 405
 
@@ -130,42 +138,67 @@ def get_inicial(email):
 @app.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get('email')
-        senha = request.form.get('senha')
+        data = request.get_json()
+        email = data.get('email')
+        senha = data.get('senha')
 
-        user = Usuarios.get_or_none(email=email, senha=senha)
+        user = Usuarios.get_or_none(Usuarios.email == email, Usuarios.senha == senha)
         if user:
-            session['user_id'] = user.id  # Armazena o ID do usuário na sessão
-            if user.is_admin:
-                return jsonify({'redirect': url_for('admin')}), 200
-            else:
-                return jsonify({'redirect': url_for('principal')}), 200
-        else:
-            flash('Usuário não encontrado', 'error')
-    
-    # Retorno padrão caso não seja feito o redirecionamento
-    return jsonify({'message': 'Erro ao fazer login'}), 401
-    
-    return jsonify({'error': 'Usuário não encontrado'}), 404
+            access_token = user.access_token  # Obtém o token armazenado no banco de dados
 
-    return jsonify({'error': 'Método não permitido'}), 405
+            response = make_response(jsonify({'message': 'Login realizado com sucesso', 'access_token': access_token}), 200)
+            response.set_cookie('access_token', access_token, httponly=True, samesite='None')
+            return response
+        else:
+            return jsonify({'message': 'Usuário não encontrado'}), 401
+
+    return jsonify({'message': 'Método não permitido'}), 405
+
+
+#Rackel,um token JWT é gerado com o email do usuário como a identidade (identity=email). Quando você acessa a rota protegida (/protected), o decorator @jwt_required() verifica se o token é válido e, se for, você pode obter a identidade do token usando get_jwt_identity(), que neste caso será o email do usuário associado ao token.
+@app.route('/protected', methods=['GET'])
+@jwt_required()
+def protected():
+    current_user = get_jwt_identity()
+    return jsonify(logged_in_as=current_user), 200
+
+
+def token_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.cookies.get('access_token')
+
+        if not token:
+            return jsonify({'error': 'Token de acesso ausente'}), 401
+
+        try:
+            payload = jwt.decode(token, 'aP34!eK@82&dO39s#BzLxG$wMpt^Qd%yZfHk!1JpN3q&UwFv', algorithms=['HS256'])
+            user_id = payload['sub']
+            user = Usuarios.get_or_none(id=user_id)
+            if user and user.is_admin:
+                return f(*args, **kwargs)
+            else:
+                return jsonify({'error': 'Usuário não autorizado'}), 403
+        except jwt.ExpiredSignatureError:
+            return jsonify({'error': 'Token expirado'}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({'error': 'Token inválido'}), 401
+
+    return decorated_function
+
 
 # Rota para a tela de administração
 @app.route('/admin')
+@token_required
 def admin():
-    if 'user_id' in session:
-        user = Usuarios.get_or_none(id=session['user_id'])
-        if user and user.is_admin:
-            # Garante que sempre haja pelo menos um moderador na lista de usuários
-            moderators = Usuarios.select().where((Usuarios.is_admin == True) & (Usuarios.is_active == True))
-            if moderators.count() == 0:
-                return jsonify({'error': 'Não há moderadores ativos. Crie um novo moderador.'}), 404
-            
-            # Garante que os moderadores estejam no topo da lista
-            users = list(moderators) + list(Usuarios.select().where((Usuarios.is_admin == False) & (Usuarios.is_active == True)))
-            user_data = [{'email': user.email, 'is_admin': user.is_admin, 'is_active': user.is_active} for user in users]
-            return jsonify({'users': user_data}), 200
-    return jsonify({'error': 'Usuário não autorizado'}), 401
+    # Se chegou até aqui, o usuário está autorizado
+    moderators = Usuarios.select().where((Usuarios.is_admin == True) & (Usuarios.is_active == True))
+    if moderators.count() == 0:
+        return jsonify({'error': 'Não há moderadores ativos. Crie um novo moderador.'}), 404
+        
+    users = list(moderators) + list(Usuarios.select().where((Usuarios.is_admin == False) & (Usuarios.is_active == True)))
+    user_data = [{'email': user.email, 'is_admin': user.is_admin, 'is_active': user.is_active} for user in users]
+    return jsonify({'users': user_data}), 200
 
 @app.route('/delete_user/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
@@ -279,21 +312,30 @@ def popular_books():
         # Lida com erros ao decodificar a resposta JSON
         return jsonify({'error': 'Erro ao processar a resposta da API do Google Books', 'details': str(e)}), 500
 
-@app.route('/adicionar_quero_ler', methods=['POST'])
-def adicionar_quero_ler():
-    data = request.json
-    email = data.get('email')
-    livro_id = data.get('livro_id')
 
-    try:
-        usuario = Usuarios.get(Usuarios.email == email)
-        livro_quero_ler = LivroQueroLer.create(usuario=usuario, livro_id=livro_id)
-        return jsonify({'message': 'Livro adicionado à lista "Quero Ler" com sucesso.'}), 200
-    except Usuarios.DoesNotExist:
-        return jsonify({'error': 'Usuário não encontrado.'}), 404
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
+@app.route('/adicionar_quero_ler/<livro_id>', methods=['POST'])
+@jwt_required()
+def adicionar_quero_ler(livro_id):
+    token = request.cookies.get('access_token')
+    authorization_header = request.headers.get('Authorization')
+    if authorization_header:
+        token_from_header = authorization_header.split(' ')[1]
+        if token == token_from_header:
+            try:
+                usuario = Usuarios.get_by_access_token(token)
+                email = usuario.email
+
+                livro_quero_ler = LivroQueroLer.create(usuario=usuario, livro_id=livro_id)
+                return jsonify({'message': 'Livro adicionado à lista "Quero Ler" com sucesso.'}), 200
+            except Usuarios.DoesNotExist:
+                return jsonify({'error': 'Usuário não encontrado.'}), 404
+            except Exception as e:
+                return jsonify({'error': str(e)}), 500
+        else:
+            return jsonify({'error': 'Token inválido para este usuário.'}), 401
+    else:
+        return jsonify({'error': 'Header Authorization não encontrado.'}), 401
    
 #rota para adicionar ao lendo
 @app.route('/adicionar_lendo', methods=['POST'])

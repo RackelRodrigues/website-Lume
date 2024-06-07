@@ -13,6 +13,10 @@ class Usuarios(BaseModel):
     senha = CharField(max_length=250, null=False)
     is_admin = BooleanField(default=False)
     is_active = BooleanField(default=True) 
+    access_token = CharField(max_length=500, null=True)
+    @classmethod
+    def get_by_access_token(cls, access_token):
+        return cls.get(cls.access_token == access_token)
 
 
 class Perfil(BaseModel):
