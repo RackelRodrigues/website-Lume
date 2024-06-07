@@ -4,7 +4,7 @@ import { useInView } from 'react-intersection-observer';
 
 
 const Conteiner = styled.div`
-display: grid;
+  display: grid;
   grid-template-columns: 1fr 1fr;
 
 `;
@@ -32,7 +32,7 @@ background-color: #E3D9BA;
 
 const BackgroundTexto = styled.div`
 background-color: #C084FC;
-height: 703px;
+height: 737,5px;
 width: 860px;
 display: flex;
 align-items: center;

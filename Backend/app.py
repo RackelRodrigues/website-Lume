@@ -27,7 +27,7 @@ app.config['SECRET_KEY'] = 'sua_chave_secreta'
 
 
 # Lógica de autenticação
-def validate_registration(email, password, confirm_password):
+def validate_registration(email, password, confirm_password, is_active, is_admin):
     if not email or not password or not confirm_password:
         return False, "Por favor, preencha todos os campos."
     
@@ -48,11 +48,12 @@ def validate_registration(email, password, confirm_password):
 @app.route("/cadastro", methods=['POST'])
 def cadastro():
     if request.method == 'POST':
-        email = request.form['email']
-        senha = request.form['password']
-        confirma_senha = request.form['confirm_password']
-        is_admin = request.form['is_admin']
-        is_active = request.form['is_active']
+        data = request.json
+        email = data['email']
+        senha = data['password']
+        confirma_senha = data['confirm_password']
+        is_admin = data['is_admin']
+        is_active = data['is_active']
         # Verificar comprimento do email e senha
         if len(email) > 255 or len(senha) > 100:
             return jsonify({'message': 'O email deve ter no máximo 255 caracteres e a senha deve ter no máximo 100 caracteres'}), 400
@@ -84,14 +85,22 @@ def cadastro():
 @app.route("/criar_perfil", methods=['POST'])
 def criar_perfil():
     if request.method == 'POST':
-        name = request.form.get('name')
-        username = request.form.get('username')
+        data = request.json
+        name = data.get('name')
+        username = data.get('username')
+        inicial = data.get('inicial')
+        email = data.get('email')
+
+        if not all([name, username, inicial, email]):
+            return jsonify({'message': 'Nome, nome de usuário, inicial e email são obrigatórios'}), 400
         
-        if not name or not username:
-            return jsonify({'message': 'Nome e nome de usuário são obrigatórios'}), 400
+        try:
+            usuario = Usuarios.select().where(Usuarios.email == email).get()
+        except Usuarios.DoesNotExist:
+            return jsonify({'message': 'Usuário não encontrado'}), 404
         
         # Crie uma nova instância do modelo "Perfil"
-        novo_perfil = Perfil(nome=name, nome_usuario=username)
+        novo_perfil = Perfil(nome=name, nome_usuario=username, inicial=inicial, usuario=usuario.id)
         
         # Salve o novo perfil no banco de dados
         novo_perfil.save()
@@ -99,6 +108,7 @@ def criar_perfil():
         return jsonify({'message': 'Perfil criado com sucesso'}), 201
 
     return jsonify({'message': 'Método não permitido'}), 405
+
 
 @app.route('/perfil/inicial/<email>', methods=['GET'])
 def get_inicial(email):
@@ -255,10 +265,19 @@ def get_bestsellers():
 
 @app.route('/popular_books', methods=['GET'])
 def popular_books():
-    url = 'https://www.googleapis.com/books/v1/volumes?q=bestsellers+subject:nonfiction&maxResults=7'
-    response = requests.get(url)
-    data = response.json()
-    return jsonify(data)
+    try:
+        url = 'https://www.googleapis.com/books/v1/volumes?q=bestsellers+subject:nonfiction&maxResults=7'
+        response = requests.get(url)
+        response.raise_for_status()  # Levanta uma exceção para códigos de status HTTP 4xx/5xx
+
+        data = response.json()
+        return jsonify(data), 200
+    except requests.exceptions.RequestException as e:
+        # Lida com erros na solicitação HTTP
+        return jsonify({'error': 'Erro ao buscar dados da API do Google Books', 'details': str(e)}), 500
+    except ValueError as e:
+        # Lida com erros ao decodificar a resposta JSON
+        return jsonify({'error': 'Erro ao processar a resposta da API do Google Books', 'details': str(e)}), 500
 
 @app.route('/adicionar_quero_ler', methods=['POST'])
 def adicionar_quero_ler():
@@ -274,6 +293,7 @@ def adicionar_quero_ler():
         return jsonify({'error': 'Usuário não encontrado.'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
    
 #rota para adicionar ao lendo
 @app.route('/adicionar_lendo', methods=['POST'])

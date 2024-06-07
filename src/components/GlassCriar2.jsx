@@ -245,6 +245,8 @@ const Glasscriar2 =()=>{
                 email: email,
                 password: senha,
                 confirm_password: confirme,
+                is_admin: false, 
+                is_active: true 
               },
               {
                 headers: {

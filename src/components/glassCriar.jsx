@@ -300,9 +300,8 @@ const GlassCriarConta = () =>{
       const handleCriarPerfil = async (e) => {
         e.preventDefault(); 
         setEmail(currentUser.currentUser);
-        console.log(currentUser);
         console.log(currentUser.email)
-        console.log(inicial)
+       
 
         if (validarCampos()) {
        

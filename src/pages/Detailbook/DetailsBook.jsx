@@ -124,6 +124,7 @@ const DetailBook = ()=>{
   
   const { currentID} = useSelector((rootReducer) => rootReducer.IDReducer);
   
+
   const getBookDetails = async () => {
     console.log(currentID.ID)
     try {
@@ -146,7 +147,7 @@ const { currentUser } = useSelector((rootReducer) => rootReducer.userReducer);
 const adicionarQueroLer = async () => {
   try {
     const response = await axios.post('http://localhost:5000/adicionar_quero_ler', {
-      email: "RAkdepr@gmail.com", 
+      email: currentUser.email, 
       livro_id: currentID.ID 
     });
     toast.success('adicionado ao Quero Ler');
