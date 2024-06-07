@@ -1,7 +1,6 @@
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
-
 uri='mongodb+srv://rackelrodrigues:kbI9PzUMmwcgjfoD@lume.yaufbho.mongodb.net/?retryWrites=true&w=majority&appName=Lume'
 
 
