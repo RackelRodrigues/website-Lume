@@ -125,7 +125,6 @@ def get_inicial(email):
         perfil = Perfil.select().where(Perfil.usuario == usuario.id).get()
         primeiro_nome = perfil.nome.split()[0]  
         return jsonify({'inicial': perfil.inicial, 'primeiro_nome': primeiro_nome})
-        return jsonify({'inicial': perfil.inicial, 'primeiro_nome': usuario.nome_usuario.split()[0]})
 
     except Usuarios.DoesNotExist:
         return jsonify({'error': 'Usuário não encontrado'}), 404
@@ -156,6 +155,7 @@ def login():
 
 
 #Rackel,um token JWT é gerado com o email do usuário como a identidade (identity=email). Quando você acessa a rota protegida (/protected), o decorator @jwt_required() verifica se o token é válido e, se for, você pode obter a identidade do token usando get_jwt_identity(), que neste caso será o email do usuário associado ao token.
+
 @app.route('/protected', methods=['GET'])
 @jwt_required()
 def protected():
@@ -188,6 +188,7 @@ def token_required(f):
 
 
 # Rota para a tela de administração
+
 @app.route('/admin')
 @token_required
 def admin():
@@ -354,7 +355,7 @@ def adicionar_lendo():
         return jsonify({'error': str(e)}), 500
     
 
-#rota para colocar na lisat de abandonei     
+#rota para colocar na lista de abandonei     
 @app.route('/adicionar_abandonei', methods=['POST'])
 def adicionar_abandonei():
     data = request.json
@@ -409,13 +410,11 @@ def get_book_details(book_id):
         
         base_url = 'https://www.googleapis.com/books/v1/volumes/'
 
-       
         url = base_url + book_id
 
-       
         response = requests.get(url)
 
-       
+
         if response.status_code == 200:
             
             return jsonify(response.json())
