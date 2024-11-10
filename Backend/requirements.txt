@@ -6,3 +6,4 @@ peewee
 psycopg2
 Werkzeug
 requests
+flask_jwt_extended

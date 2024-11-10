@@ -51,9 +51,18 @@ def validate_registration(email, password, confirm_password, is_active, is_admin
     
     return True, "Cadastro válido."
 
+<<<<<<< HEAD
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id) 
+=======
+# Registrar atividades dos usuários para o feed
+def registrar_atividade(usuario_id, descricao):
+    try:
+        Atividades.create(usuario_id=usuario_id, descricao=descricao)
+    except Exception as e:
+        print(f'Erro ao registrar atividade: {str(e)}')
+>>>>>>> 3e9de9aba1d54a81a834b848e5e474fb5a31fdec
 
 
 @app.route("/cadastro", methods=['POST'])
@@ -133,7 +142,6 @@ def get_inicial(email):
         perfil = Perfil.select().where(Perfil.usuario == usuario.id).get()
         primeiro_nome = perfil.nome.split()[0]  
         return jsonify({'inicial': perfil.inicial, 'primeiro_nome': primeiro_nome})
-        return jsonify({'inicial': perfil.inicial, 'primeiro_nome': usuario.nome_usuario.split()[0]})
 
     except Usuarios.DoesNotExist:
         return jsonify({'error': 'Usuário não encontrado'}), 404
@@ -174,6 +182,7 @@ def login():
 
 
 #Rackel,um token JWT é gerado com o email do usuário como a identidade (identity=email). Quando você acessa a rota protegida (/protected), o decorator @jwt_required() verifica se o token é válido e, se for, você pode obter a identidade do token usando get_jwt_identity(), que neste caso será o email do usuário associado ao token.
+
 @app.route('/protected', methods=['GET'])
 @jwt_required()
 def protected():
@@ -206,6 +215,7 @@ def token_required(f):
 
 
 # Rota para a tela de administração
+
 @app.route('/admin')
 @login_required
 def admin():
@@ -348,6 +358,7 @@ def adicionar_quero_ler(livro_id):
             livro_quero_ler = LivroQueroLer.create(usuario=current_user, livro_id=livro_id)
             return jsonify({'message': 'Livro adicionado à lista "Quero Ler" com sucesso.'}), 200
         else:
+<<<<<<< HEAD
             # Retorna uma mensagem de erro se o usuário não estiver autenticado
             return jsonify({'error': 'Usuário não autenticado'}), 401
     except Exception as e:
@@ -356,6 +367,13 @@ def adicionar_quero_ler(livro_id):
 
 
 #rota para adicionar ao lendo
+=======
+            return jsonify({'error': 'Token inválido para este usuário.'}), 401
+    else:
+        return jsonify({'error': 'Header Authorization não encontrado.'}), 401
+   
+
+>>>>>>> 3e9de9aba1d54a81a834b848e5e474fb5a31fdec
 @app.route('/adicionar_lendo', methods=['POST'])
 def adicionar_lendo():
     data = request.json
@@ -371,8 +389,7 @@ def adicionar_lendo():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
-
-#rota para colocar na lisat de abandonei     
+    
 @app.route('/adicionar_abandonei', methods=['POST'])
 def adicionar_abandonei():
     data = request.json
@@ -404,22 +421,209 @@ def adicionar_ja_li():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
+@app.route('/feed/<int:usuario_id>', methods=['GET'])
+def feed(usuario_id):
+    try:
+        # Buscar todas as atividades relacionadas ao usuário
+        atividades = (Atividades
+                      .select()
+                      .where(Atividades.usuario_id == usuario_id)
+                      .order_by(Atividades.timestamp.desc())
+                      .limit(10))  # Limitar o número de atividades retornadas.
+
+        # Estruturar os dados para retorno em JSON
+        feed_data = []
+        for atividade in atividades:
+            feed_data.append({
+                'descricao': atividade.descricao,
+                'timestamp': atividade.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+            })
+
+        return jsonify({'feed': feed_data}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
     
-@app.route('/adicionar_favorito', methods=['POST'])
-def adicionar_favorito():
+@app.route('/botao_adicionar_favoritos', methods=['POST'])
+def botao_adicionar_favoritos():
     data = request.json
-    email = data.get('email')
+    usuario_id = data.get('usuario_id')
+    livro_id = data.get('livro_id')
+
+    try:
+        # Verifica se o usuário existe
+        usuario = Usuarios.get_or_none(Usuarios.id == usuario_id)
+        if not usuario:
+            return jsonify({'error': 'Usuário não encontrado'}), 404
+        
+        # Verifica se o livro existe
+        livro = Livros.get_or_none(Livros.id == livro_id)
+        if not livro:
+            return jsonify({'error': 'Livro não encontrado'}), 404
+
+        # Adiciona aos favoritos diretamente
+        Favoritos.create(usuario=usuario, livro=livro)
+
+        # Registra a atividade de adicionar aos favoritos
+        Atividades.create(usuario=usuario, tipo='adicionar_favoritos', livro=livro)
+
+        return jsonify({'message': 'Livro adicionado aos favoritos com sucesso'}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/avaliacao_livro', methods=['POST'])
+def avaliacao_livro():
+    data = request.json
+    usuario_id = data.get('usuario_id')
     livro_id = data.get('livro_id')
     avaliacao = data.get('avaliacao')
 
     try:
-        usuario = Usuarios.get(Usuarios.email == email)
-        favorito = Favoritos.create(id_usuario=usuario, livro_id=livro_id, avaliacao=avaliacao)
-        return jsonify({'message': 'Livro adicionado aos favoritos com sucesso.'}), 200
-    except Usuarios.DoesNotExist:
-        return jsonify({'error': 'Usuário não encontrado.'}), 404
+        # Verifica se o usuário existe
+        usuario = Usuarios.get_or_none(Usuarios.id == usuario_id)
+        if not usuario:
+            return jsonify({'error': 'Usuário não encontrado'}), 404
+        
+        # Verifica se o livro existe
+        livro = Livros.get_or_none(Livros.id == livro_id)
+        if not livro:
+            return jsonify({'error': 'Livro não encontrado'}), 404
+
+        # Verifica se a avaliação está dentro do intervalo de 1 a 5 estrelas
+        if not (1 <= avaliacao <= 5):
+            return jsonify({'error': 'A avaliação deve estar no intervalo de 1 a 5 estrelas'}), 400
+
+        # Cria uma nova avaliação na tabela Avaliacoes
+        nova_avaliacao = Avaliacoes.create(id_usuario=usuario_id, livro_id=livro_id, avaliacao=avaliacao)
+
+        # Atualiza a avaliação média do livro na tabela Livros
+        total_avaliacoes = Avaliacoes.select(fn.Count(Avaliacoes.avaliacao)).where(Avaliacoes.livro_id == livro_id).scalar()
+        soma_avaliacoes = Avaliacoes.select(fn.Sum(Avaliacoes.avaliacao)).where(Avaliacoes.livro_id == livro_id).scalar()
+        
+        if total_avaliacoes:
+            livro.avaliacao_media = soma_avaliacoes / total_avaliacoes
+        else:
+            livro.avaliacao_media = 0
+        
+        livro.save()
+
+        # Registra a atividade de adição de avaliação
+        Atividades.create(usuario=usuario, descricao=f'Avaliou o livro {livro.titulo} com {avaliacao} estrelas')
+
+        # Adiciona aos favoritos se a avaliação for 5 estrelas
+        if avaliacao == 5:
+            Favoritos.create(id_usuario=usuario_id, livro_id=livro_id)
+            Atividades.create(usuario=usuario, descricao=f'Adicionou o livro {livro.titulo} aos favoritos')
+
+        return jsonify({'message': 'Avaliação registrada com sucesso'}), 200
+    
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+    
+"""
+@app.route('/remover_livro', methods=['POST'])
+def remover_livro():
+    data = request.json
+    livro_id = data.get('livro_id')
+    usuario_id = data.get('usuario_id')
+    status_leitura = data.get('status_leitura')
+
+    try:
+        livro = Livros.get(Livros.id == livro_id, Livros.usuario_id == usuario_id)
+        if livro:
+            # Verifique o status de leitura do livro
+            if status_leitura == 'lendo':
+                livro.lendo = False
+            elif status_leitura == 'lido':
+                livro.lido = False
+            elif status_leitura == 'quero_ler':
+                livro.quero_ler = False
+            elif status_leitura == 'abandonado':
+                livro.abandonado = False
+            else:
+                return jsonify({'error': 'Status de leitura inválido'}), 400
+            
+            # Salvar as alterações no banco de dados
+            livro.save()
+            
+            return jsonify({'message': 'Livro removido com sucesso'}), 200
+        else:
+            return jsonify({'error': 'Esse livro não foi adicionado a nenhuma lista'}), 404
+    except Livros.DoesNotExist:
+        return jsonify({'error': 'Esse livro não foi adicionado a nenhuma lista'}), 404
+    except Exception as e:
+        return jsonify({'error': f'Erro ao remover o livro: {str(e)}'}), 500
+""" 
+
+"""
+@app.route('/mover_livro', methods=['POST'])
+def mover_livro():
+    data = request.json
+    livro_id = data.get('livro_id')
+    usuario_id = data.get('usuario_id')
+    novo_status_leitura = data.get('novo_status_leitura')
+
+    try:
+        # Verifica se o livro pertence ao usuário
+        livro = Livros.get(Livros.id == livro_id, Livros.usuario_id == usuario_id)
+        
+        # Atualiza o status de leitura do livro
+        if novo_status_leitura in ['lendo', 'lido', 'quero_ler', 'abandonado']:
+            setattr(livro, novo_status_leitura, True)
+            livro.save()
+            return jsonify({'message': 'Livro movido com sucesso para a lista ' + novo_status_leitura}), 200
+        else:
+            return jsonify({'error': 'Status de leitura inválido'}), 400
+
+    except Livros.DoesNotExist:
+        return jsonify({'error': 'Livro não encontrado ou não pertence ao usuário'}), 404
+    except Exception as e:
+        return jsonify({'error': f'Erro ao mover o livro: {str(e)}'}), 500
+"""
+@app.route('/progresso_leitura', methods=['POST'])
+def progresso_leitura():
+    data = request.json
+    livro_id = data.get('livro_id')
+    usuario_id = data.get('usuario_id')
+    pagina_atual = data.get('pagina_atual')
+
+    try:
+        livro = Livros.get(Livros.id == livro_id, Livros.usuario_id == usuario_id)
+        if livro:
+            # Verifica se o livro está marcado como 'lendo'
+            if livro.lendo:
+                # Atualiza a página atual do livro
+                livro.pagina_atual = pagina_atual
+                livro.save()
+
+                # Obtém o número total de páginas do livro da API do Google Books
+                url = f'https://www.googleapis.com/books/v1/volumes/{livro.livro_id}'
+                response = requests.get(url)
+                if response.status_code == 200:
+                    livro_info = response.json()
+                    total_paginas = livro_info.get('volumeInfo', {}).get('pageCount', 0)
+
+                    # Calcula a porcentagem de progresso
+                    if total_paginas > 0:
+                        progresso = (pagina_atual / total_paginas) * 100
+                        return jsonify({'message': 'Progresso atualizado com sucesso', 'progresso': progresso}), 200
+                    else:
+                        return jsonify({'error': 'Número total de páginas não disponível'}), 500
+                else:
+                    return jsonify({'error': 'Falha ao obter informações do livro da API de livros do Google'}), 500
+            else:
+                return jsonify({'error': 'O livro não está marcado como "lendo"'}), 400
+        else:
+            return jsonify({'error': 'Livro não encontrado'}), 404
+    except Livros.DoesNotExist:
+        return jsonify({'error': 'Livro não encontrado'}), 404
+    except Exception as e:
+        return jsonify({'error': f'Erro ao atualizar o progresso de leitura: {str(e)}'}), 500
 
 @app.route('/book-details/<book_id>')
 def get_book_details(book_id):
@@ -427,13 +631,11 @@ def get_book_details(book_id):
         
         base_url = 'https://www.googleapis.com/books/v1/volumes/'
 
-       
         url = base_url + book_id
 
-       
         response = requests.get(url)
 
-       
+
         if response.status_code == 200:
             
             return jsonify(response.json())
