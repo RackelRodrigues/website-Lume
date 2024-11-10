@@ -127,24 +127,23 @@ const AdminScreen = () =>{
 
     useEffect(() => {
         const fetchUsers = async () => {
-            try {
-                const response = await axios.get('http://localhost:5000/admin', {
-                   
-                    headers: {
-                        withCredentials: true,
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': 'http://localhost:5000/admin',
-                    }
-                });
-                document.cookie = `access_token=${access_token}; Secure; SameSite=None`;
-                setUsers(response.data.users);
-            } catch (error) {
-                console.error('Error fetching users:', error);
-                // Handle error
+          try {
+            const response = await axios.get('http://localhost:5000/admin', {
+              withCredentials: true,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+            setUsers(response.data.users);
+          } catch (error) {
+            console.error('Error fetching users:', error);
+            if (error.response && error.response.status === 401) {
+              navigate('/login');
             }
+          }
         };
         fetchUsers();
-    }, []);
+      }, [navigate]);
 
     const navegate = useNavigate();
     const handletoBack = () => {

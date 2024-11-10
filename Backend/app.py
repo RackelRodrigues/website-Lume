@@ -1,6 +1,7 @@
 from flask import Flask, render_template, make_response,redirect, url_for, flash, request, jsonify, session, flash
 import requests
 from flask_wtf import FlaskForm
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo
 from werkzeug.security import generate_password_hash
@@ -11,6 +12,7 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from werkzeug.utils import secure_filename
 from playhouse.shortcuts import model_to_dict
 from esquema.esquema import *
+from datetime import timedelta
 import os, re
 import requests
 from flask_cors import CORS
@@ -28,6 +30,9 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['SECRET_KEY'] = 'aP34!eK@82&dO39s#BzLxG$wMpt^Qd%yZfHk!1JpN3q&UwFv'
 jwt = JWTManager(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 # Lógica de autenticação
 def validate_registration(email, password, confirm_password, is_active, is_admin):
@@ -46,6 +51,9 @@ def validate_registration(email, password, confirm_password, is_active, is_admin
     
     return True, "Cadastro válido."
 
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id) 
 
 
 @app.route("/cadastro", methods=['POST'])
@@ -135,7 +143,7 @@ def get_inicial(email):
         return jsonify({'error': f'Erro ao buscar perfil inicial: {str(e)}'}), 500
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
         data = request.get_json()
@@ -145,13 +153,23 @@ def login():
         user = Usuarios.get_or_none(Usuarios.email == email, Usuarios.senha == senha)
         if user:
             access_token = user.access_token  # Obtém o token armazenado no banco de dados
+            login_user(user, remember=True, duration=timedelta(days=30))
 
-            response = make_response(jsonify({'message': 'Login realizado com sucesso', 'access_token': access_token}), 200)
+            response_data = {
+                'message': 'Login realizado com sucesso',
+                'access_token': access_token,
+                'is_admin': user.is_admin  # Inclui a informação 'is_admin' no retorno
+            }
+
+            response = make_response(jsonify(response_data), 200)
             response.set_cookie('access_token', access_token, httponly=True, samesite='None')
             return response
         else:
             return jsonify({'message': 'Usuário não encontrado'}), 401
-
+    if current_user.is_authenticated:
+        # Se o usuário já estiver autenticado, redirecione para a página desejada após o login
+        next_page = request.args.get('next')
+        return redirect(next_page or url_for('index'))
     return jsonify({'message': 'Método não permitido'}), 405
 
 
@@ -189,9 +207,12 @@ def token_required(f):
 
 # Rota para a tela de administração
 @app.route('/admin')
-@token_required
+@login_required
 def admin():
-    # Se chegou até aqui, o usuário está autorizado
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))  
+
+    
     moderators = Usuarios.select().where((Usuarios.is_admin == True) & (Usuarios.is_active == True))
     if moderators.count() == 0:
         return jsonify({'error': 'Não há moderadores ativos. Crie um novo moderador.'}), 404
@@ -199,6 +220,7 @@ def admin():
     users = list(moderators) + list(Usuarios.select().where((Usuarios.is_admin == False) & (Usuarios.is_active == True)))
     user_data = [{'email': user.email, 'is_admin': user.is_admin, 'is_active': user.is_active} for user in users]
     return jsonify({'users': user_data}), 200
+
 
 @app.route('/delete_user/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
@@ -315,28 +337,24 @@ def popular_books():
 
 
 @app.route('/adicionar_quero_ler/<livro_id>', methods=['POST'])
-@jwt_required()
+@login_required
 def adicionar_quero_ler(livro_id):
-    token = request.cookies.get('access_token')
-    authorization_header = request.headers.get('Authorization')
-    if authorization_header:
-        token_from_header = authorization_header.split(' ')[1]
-        if token == token_from_header:
-            try:
-                usuario = Usuarios.get_by_access_token(token)
-                email = usuario.email
+    try:
+        # Verifica se o usuário está autenticado
+        if current_user.is_authenticated:
+            # Faça aqui o que você precisa fazer quando o usuário está autenticado
+            email = current_user.email
 
-                livro_quero_ler = LivroQueroLer.create(usuario=usuario, livro_id=livro_id)
-                return jsonify({'message': 'Livro adicionado à lista "Quero Ler" com sucesso.'}), 200
-            except Usuarios.DoesNotExist:
-                return jsonify({'error': 'Usuário não encontrado.'}), 404
-            except Exception as e:
-                return jsonify({'error': str(e)}), 500
+            livro_quero_ler = LivroQueroLer.create(usuario=current_user, livro_id=livro_id)
+            return jsonify({'message': 'Livro adicionado à lista "Quero Ler" com sucesso.'}), 200
         else:
-            return jsonify({'error': 'Token inválido para este usuário.'}), 401
-    else:
-        return jsonify({'error': 'Header Authorization não encontrado.'}), 401
-   
+            # Retorna uma mensagem de erro se o usuário não estiver autenticado
+            return jsonify({'error': 'Usuário não autenticado'}), 401
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+
+
 #rota para adicionar ao lendo
 @app.route('/adicionar_lendo', methods=['POST'])
 def adicionar_lendo():
@@ -425,6 +443,12 @@ def get_book_details(book_id):
     except Exception as e:
        
         return jsonify({'error': 'Erro ao processar a requisição'}), 500
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return jsonify({'message': 'Logout realizado com sucesso'}), 200
 
 
 @app.route('/')

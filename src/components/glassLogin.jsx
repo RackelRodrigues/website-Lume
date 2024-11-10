@@ -240,17 +240,18 @@ const GlassLogin = () => {
               payload: {email: email}
             });
             if (response.status === 302 || 200) {
-              toast.success('Login realizado com sucesso!');
-              const { access_token } = response.data;
+              const { access_token, is_admin } = response.data;
               document.cookie = `access_token=${access_token}; Secure; SameSite=None`;
-
-       // Salva o token no localStorage
-           localStorage.setItem('access_token', access_token);
-
-              setTimeout(() => {
-                window.location.href = '/';
-              }, 2000);
-            } 
+           
+              if (is_admin) {
+                window.location.href = '/Adminscreen';
+              } else {
+                toast.success('Login realizado com sucesso!');
+                setTimeout(() => {
+                  window.location.href = '/';
+                }, 2000);
+              }
+            }
           } catch (error) {
             toast.error('Erro ao fazer login. Por favor, tente novamente.');
           }
