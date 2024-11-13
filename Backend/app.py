@@ -12,12 +12,53 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from werkzeug.utils import secure_filename
 from playhouse.shortcuts import model_to_dict
 from esquema.esquema import *
-from datetime import timedelta
+from datetime import timedelta, datetime
 import os, re
 import requests
 from flask_cors import CORS
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail as SendGridMail
+import jwt
+from dotenv import load_dotenv
+
+# Carrega as variáveis do arquivo .env
+load_dotenv()
 
 
+app = Flask(__name__)
+app.config['SECRET_KEY'] = os.urandom(24)
+app.config['SENDGRID_API_KEY'] = os.getenv('SENDGRID_API_KEY')
+jwt = JWTManager(app)
+app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET_KEY")
+app.config['EMAIL_REMETENTE'] = os.getenv("EMAIL_REMETENTE")
+
+
+print(os.getenv("SENDGRID_API_KEY"))
+
+
+def send_email(to_email, subject, content):
+    """Função para enviar e-mail utilizando SendGrid"""
+    message = SendGridMail(
+        from_email='fonsecaleonardo86@gmail.com',
+        to_emails=to_email,
+        subject=subject,
+        plain_text_content=content
+    )
+    try:
+        #sg = SendGridAPIClient(api_key=app.config['SENDGRID_API_KEY'])
+        sg = SendGridAPIClient(app.config['SENDGRID_API_KEY'])
+        response = sg.send(message)
+        print(f"Status code: {response.status_code}")
+        print(f"Body: {response.body}")
+        print(f"Headers: {response.headers}")
+    except Exception as e:
+        print(f"Erro ao enviar e-mail: {str(e)}")
+
+def generate_reset_token(user_id):
+    """Gera um token JWT com validade de 30 minutos"""
+    expiration = timedelta(minutes=30)
+    token = create_access_token(identity=user_id, expires_delta=expiration)
+    return token
 
 class CadastroForm(FlaskForm):
     email = StringField('email', validators=[DataRequired(), Email()])
@@ -26,10 +67,8 @@ class CadastroForm(FlaskForm):
     
 
 
-app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
-app.config['SECRET_KEY'] = 'aP34!eK@82&dO39s#BzLxG$wMpt^Qd%yZfHk!1JpN3q&UwFv'
-jwt = JWTManager(app)
+app.config['SECRET_KEY'] = 'aP34!eK@82&dO39s#BzLxG$wMpt^Qd%yZfHk!1JpN3q&UwFv',
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -51,18 +90,18 @@ def validate_registration(email, password, confirm_password, is_active, is_admin
     
     return True, "Cadastro válido."
 
-<<<<<<< HEAD
+
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(user_id) 
-=======
+    return Usuarios.query.get(user_id) 
+
 # Registrar atividades dos usuários para o feed
 def registrar_atividade(usuario_id, descricao):
     try:
         Atividades.create(usuario_id=usuario_id, descricao=descricao)
     except Exception as e:
         print(f'Erro ao registrar atividade: {str(e)}')
->>>>>>> 3e9de9aba1d54a81a834b848e5e474fb5a31fdec
+
 
 
 @app.route("/cadastro", methods=['POST'])
@@ -151,6 +190,8 @@ def get_inicial(email):
         return jsonify({'error': f'Erro ao buscar perfil inicial: {str(e)}'}), 500
 
 
+from werkzeug.security import check_password_hash
+
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
@@ -158,27 +199,102 @@ def login():
         email = data.get('email')
         senha = data.get('senha')
 
-        user = Usuarios.get_or_none(Usuarios.email == email, Usuarios.senha == senha)
-        if user:
-            access_token = user.access_token  # Obtém o token armazenado no banco de dados
+        if not email or not senha:
+            return jsonify({'message': 'Email e senha são obrigatórios'}), 400
+
+        user = Usuarios.get_or_none(Usuarios.email == email)
+        if user and check_password_hash(user.senha, senha):
+            access_token = create_access_token(identity=user.id)
             login_user(user, remember=True, duration=timedelta(days=30))
 
             response_data = {
                 'message': 'Login realizado com sucesso',
                 'access_token': access_token,
-                'is_admin': user.is_admin  # Inclui a informação 'is_admin' no retorno
+                'is_admin': user.is_admin
             }
 
             response = make_response(jsonify(response_data), 200)
             response.set_cookie('access_token', access_token, httponly=True, samesite='None')
             return response
         else:
-            return jsonify({'message': 'Usuário não encontrado'}), 401
+            return jsonify({'message': 'Usuário ou senha incorretos'}), 401
+
     if current_user.is_authenticated:
-        # Se o usuário já estiver autenticado, redirecione para a página desejada após o login
         next_page = request.args.get('next')
-        return redirect(next_page or url_for('index'))
-    return jsonify({'message': 'Método não permitido'}), 405
+        return redirect(next_page or url_for('index'))  # Redireciona para a página desejada
+
+    return render_template('login.html')
+
+
+
+@app.route('/reset_password', methods=['GET', 'POST'])
+def reset_password():
+    """Rota para solicitar redefinição de senha"""
+    if request.method == 'POST':
+        email = request.form['email']
+        
+        # Usando Peewee para buscar o usuário pelo e-mail
+        try:
+            user = Usuarios.get(Usuarios.email == email)
+            token = generate_reset_token(user.email)  # Gere o token com o e-mail do usuário
+            reset_url = url_for('confirm_reset', token=token, _external=True)
+            send_email(email, 'Redefinição de Senha', f'Clique no link para redefinir sua senha: {reset_url}')
+            flash('Um e-mail com o link de redefinição de senha foi enviado.')
+            return redirect(url_for('login'))
+        
+        except Usuarios.DoesNotExist:
+            flash('E-mail não encontrado')
+
+    return render_template('reset_password.html')
+
+import jwt  # Importe a biblioteca 'jwt' (pyjwt)
+from flask import flash, redirect, url_for, request, render_template
+from werkzeug.security import generate_password_hash, check_password_hash
+
+#oklwekgwrgergerhrthhetrhetherther
+import jwt
+from datetime import datetime, timedelta
+
+def generate_reset_token(user_id):
+    expiration = datetime.utcnow() + timedelta(hours=1)  # Token válido por 1 hora
+    token = jwt.encode(
+        {'user_id': user_id, 'exp': expiration}, 
+        app.config['JWT_SECRET_KEY'], 
+        algorithm='HS256'
+    )
+    return token
+
+
+@app.route('/confirm_reset/<token>', methods=['GET', 'POST'])
+def confirm_reset(token):
+    try:
+        decoded_token = jwt.decode(token, app.config['JWT_SECRET_KEY'], algorithms=['HS256'])
+        user_id = decoded_token['user_id']
+    except jwt.ExpiredSignatureError:
+        flash('O link de redefinição de senha expirou.')
+        return redirect(url_for('reset_password'))
+    except jwt.InvalidTokenError:
+        flash('Token inválido.')
+        return redirect(url_for('reset_password'))
+    
+    if request.method == 'POST':
+        new_password = request.form['new_password']
+        confirm_password = request.form['confirm_password']
+        
+        if new_password == confirm_password:
+            # Aqui a busca é feita pelo email, não pelo id
+            try:
+                usuario = Usuarios.get(Usuarios.email == user_id)  # Busca pelo email
+                usuario.senha = new_password  # Atualiza a senha
+                usuario.save()  # Salva a atualização no banco de dados
+                flash('Senha atualizada com sucesso!')
+                return redirect(url_for('login'))
+            except Usuarios.DoesNotExist:
+                flash('Usuário não encontrado.')
+        else:
+            flash('As senhas não coincidem. Tente novamente.')
+
+    return render_template('confirm_reset.html')
 
 
 #Rackel,um token JWT é gerado com o email do usuário como a identidade (identity=email). Quando você acessa a rota protegida (/protected), o decorator @jwt_required() verifica se o token é válido e, se for, você pode obter a identidade do token usando get_jwt_identity(), que neste caso será o email do usuário associado ao token.
@@ -358,7 +474,7 @@ def adicionar_quero_ler(livro_id):
             livro_quero_ler = LivroQueroLer.create(usuario=current_user, livro_id=livro_id)
             return jsonify({'message': 'Livro adicionado à lista "Quero Ler" com sucesso.'}), 200
         else:
-<<<<<<< HEAD
+
             # Retorna uma mensagem de erro se o usuário não estiver autenticado
             return jsonify({'error': 'Usuário não autenticado'}), 401
     except Exception as e:
@@ -366,14 +482,15 @@ def adicionar_quero_ler(livro_id):
     
 
 
+
 #rota para adicionar ao lendo
-=======
-            return jsonify({'error': 'Token inválido para este usuário.'}), 401
+
+        return jsonify({'error': 'Token inválido para este usuário.'}), 401
     else:
         return jsonify({'error': 'Header Authorization não encontrado.'}), 401
    
 
->>>>>>> 3e9de9aba1d54a81a834b848e5e474fb5a31fdec
+
 @app.route('/adicionar_lendo', methods=['POST'])
 def adicionar_lendo():
     data = request.json

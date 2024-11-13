@@ -1,8 +1,8 @@
 import datetime
 from peewee import *
 
-#db = PostgresqlDatabase('lumedb', port=5432, user='postgres', password='875838')
-db = PostgresqlDatabase('lume_db', port=5432, user='postgres', password='123456')
+
+db = PostgresqlDatabase('lume_db', port=5432, user='postgres', password='152538')
 
 
 class BaseModel(Model):
