@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import axios from "axios";
-import Header from "../../components/header";
+import Header from '../../components/Header/header';
 import { PiBooksLight } from "react-icons/pi";
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';

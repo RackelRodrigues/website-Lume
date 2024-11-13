@@ -1,12 +1,12 @@
 import styled from "styled-components";
-import Logo_lume from '../images/logo_lume.png';
+import Logo_lume from '../../../public/images/logo_lume.png';
 import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 import  {  GoogleOAuthProvider, GoogleLogin   }from '@react-oauth/google' ;
 
 import { jwtDecode } from "jwt-decode";
-import UserActionTypes from "../redux/user/action-types";
+import UserActionTypes from "../../redux/user/action-types";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useDispatch } from "react-redux";

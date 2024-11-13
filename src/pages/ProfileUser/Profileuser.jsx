@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import Header from "../../components/header";
+import Header from "../../components/Header/header";
 import { IoIosLogOut } from "react-icons/io";
 import { PiBooksLight } from "react-icons/pi";
 import { HiOutlineBookOpen } from "react-icons/hi2";

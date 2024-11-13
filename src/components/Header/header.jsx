@@ -1,9 +1,9 @@
-import Logo_lume from '../images/logo_lume.png'
+import Logo_lume from '../../../public/images/logo_lume.png'
 import { GoPerson } from "react-icons/go";
 import { useSelector} from 'react-redux';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import UserActionTypes from "../redux/user/action-types";
+import UserActionTypes from "../../redux/user/action-types";
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 

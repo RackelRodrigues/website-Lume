@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-const Container = styled.div`
+export const Container = styled.div`
 position: fixed;
   top: 50%;
   left: 50%;
@@ -18,7 +18,7 @@ z-index: 1;
 
 `;
 
-const H1= styled.h1`
+export const H1= styled.h1`
 font-family: Raleway;
 font-size: 28px;
 color: #000;
@@ -27,18 +27,3 @@ color: #000;
 `;
 
 
-
-
-
-
-const Classification = ()=>{
-    return(
-        <>
-        
-        
-        </>
-    )
-}
-
-
-export default Classification;

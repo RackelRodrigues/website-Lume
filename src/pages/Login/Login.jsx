@@ -1,6 +1,6 @@
-import BackgroundBlack from '../../images/background_black.png';
+import BackgroundBlack from '../../../public/images/background_black.png';
 import styled from 'styled-components';
-import GlassLogin from '../../components/glassLogin';
+import GlassLogin from '../../components/GlassLogin/glassLogin';
 
 const Background = styled.div`
 background-image: url(${BackgroundBlack});

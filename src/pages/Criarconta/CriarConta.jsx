@@ -1,6 +1,6 @@
 import styled from "styled-components";
-import GlassCriar from '../../components/glassCriar';
-import BackgroundBlue from "../../images/background_blue.png";
+import GlassCriar from '../../components/GlassCriar1/glassCriar';
+import BackgroundBlue from "../../../public/images/background_blue.png";
 
 const Background = styled.div`
 background-image: url(${BackgroundBlue});
