@@ -28,8 +28,8 @@ load_dotenv();
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
-app.config['SECRET_KEY'] = 'aP34!eK@82&dO39s#BzLxG$wMpt^Qd%yZfHk!1JpN3q&UwFv'
-app.config['SENDGRID_API_KEY'] = os.getenv('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')
+#app.config['SECRET_KEY'] = 'aP34!eK@82&dO39s#BzLxG$wMpt^Qd%yZfHk!1JpN3q&UwFv' descomente
+#app.config['SENDGRID_API_KEY'] = os.getenv('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')
 jwt = JWTManager(app)
 login_manager = LoginManager()
 
