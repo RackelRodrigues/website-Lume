@@ -1,4 +1,4 @@
-import Logo_lume from '../../../public/images/logo_lume.png'
+import Logo_lume from '../../../public/images/logo_lume.svg'
 import { GoPerson } from "react-icons/go";
 import { useSelector} from 'react-redux';
 import { useState, useEffect } from 'react';
@@ -31,7 +31,7 @@ border-radius: 10px;
 const Text = styled.a`
 font-family: Raleway;
 font-size: 20px;
-font-weight: 200;
+font-weight: 400;
 color: #A3B1A9;
 position: relative; 
 display: inline-block;
@@ -64,8 +64,8 @@ text-decoration: none;
 const TextLogo = styled.h3`
 font-family: Raleway;
 font-size: 20px;
-font-weight: 500;
-color: #A3B1A9;
+font-weight: 100;
+color: #222;
 margin-left: 5px;
 
 `;
@@ -214,22 +214,20 @@ return(
 
 
 <BoxButtons>
-<Text href="/">Home</Text>
-<Text href="/Books">Books</Text>
+<Text href="/">Explore Livros</Text>
+<Text href="/Books">quem somos</Text>
 <Text onClick={() => {
     const historiaSection = document.getElementById('nossa-historia');
     if (historiaSection) {
         historiaSection.scrollIntoView({ behavior: 'smooth' });
     }
-}}>Nossa história</Text>
-
+}}>Comece a Ler</Text>
+<Text href="/Books">Junte-se á comunidade</Text>
 
   
 
   {currentUser.email && showDivNamed ? (
         <ButtonLogin>
-  
-        
         <DivNamed as={Link} to="/pageuser"
         bgColor={color}>{initial}</DivNamed>
         Ola,{primeiro_nome}

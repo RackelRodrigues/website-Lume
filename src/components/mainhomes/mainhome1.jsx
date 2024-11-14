@@ -1,4 +1,5 @@
 import styled, { keyframes } from 'styled-components';
+import {arrow} from '../../../public/images/arrow.svg';
 import { Link } from 'react-router-dom';
 
 const StyledLink = styled(Link)`
@@ -93,15 +94,14 @@ const MainHome1 =()=>{
         <>
         <ConteinerHome>
         <Titulo>
-        Bem-vindo(a) ao <Span>Lume</Span>,
+        Descubra seu novo brilho literário no<Span>Lume</Span>,
         </Titulo>
         <Subtitulo>
-        Onde cada livro é uma chama acesa, iluminando novas histórias e mundos para você explorar!
-        </Subtitulo>
+        Em nosso universo literário, cada livro é uma chama acesa, oferecendo luz a novas histórias e mundos para você explorar. Permita-se mergulhar em narrativas envolventes, descobrindo emoções e experiências que só a leitura pode proporcionar.   </Subtitulo>
         </ConteinerHome>
        <ConteinerBottom>
         <StyledLink to='/Login'>
-        <Button>Explorar</Button>  
+        <Button>Descubra agora</Button>  
         </StyledLink>
         <Img src='https://i.ibb.co/7JwZ7s8/livros-home.png' alt='foto de Livros'/>
         </ConteinerBottom>
