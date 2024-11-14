@@ -32,8 +32,7 @@ app.config['SECRET_KEY'] = 'aP34!eK@82&dO39s#BzLxG$wMpt^Qd%yZfHk!1JpN3q&UwFv'
 app.config['SENDGRID_API_KEY'] = os.getenv('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')
 jwt = JWTManager(app)
 login_manager = LoginManager()
-login_manager.init_app(app)
-api
+
 login_manager.login_view = 'login'
 SENDGRID_API_KEY = os.getenv('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')
 
@@ -456,7 +455,7 @@ def search_books():
     query = data.get('query', '')
     
     api_key = 'AIzaSyCsUUXAR5RnP5beEmDu95DID0Wqz8dyTPo'
-    url = f'https://www.googleapis.com/books/v1/volumes?q={query}&key=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'
+    url = f'https://www.googleapis.com/books/v1/volumes?q={query}&key=coloque aqui'
 
     response = requests.get(url)
     data = response.json()
