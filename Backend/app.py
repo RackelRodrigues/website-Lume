@@ -34,7 +34,7 @@ jwt = JWTManager(app)
 login_manager = LoginManager()
 
 login_manager.login_view = 'login'
-SENDGRID_API_KEY = os.getenv('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')
+#SENDGRID_API_KEY = os.getenv('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')
 
 
 
@@ -107,7 +107,7 @@ class CadastroForm(FlaskForm):
 
 
 CORS(app, resources={r"/": {"origins": ""}})
-app.config['SECRET_KEY'] = 'aP34!eK@82&dO39s#BzLxG$wMpt^Qd%yZfHk!1JpN3q&UwFv',
+#app.config['SECRET_KEY'] = 'aP34!eK@82&dO39s#BzLxG$wMpt^Qd%yZfHk!1JpN3q&UwFv',
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
