@@ -1,125 +1,174 @@
-import styled, { keyframes } from 'styled-components';
-import { useRef } from 'react';
-import { useInView } from 'react-intersection-observer';
-
+import styled, { keyframes } from "styled-components";
+import Homideitado from "../../../public/images/Homideitado.svg";
 
 const Conteiner = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
-
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  margin-bottom: 30px;
 `;
 
-const BackgroundImage = styled.div`
-background-color: #E3D9BA;
-height: 100vh;
-width: 659px;
-position: relative;
-`
-    
+
+
 const Img = styled.img`
-background-color: #E3D9BA;
   height: 650px;
-  width: 659px;
-  border-top-left-radius: 50%; 
-  border-top-right-radius: 50%;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  position: absolute; 
-  bottom: 0;
-  right: 0;
-  left: 0;
+  width: 650px;
 `;
+const StyledHr = styled.hr`
+ position: relative;
+  width: 2px; /* Largura da linha */
+  height: 80%; /* Definindo a altura */
+  margin: 20px auto; /* Espaçamento automático para centralizar */
+  background-color: transparent; /* Remove qualquer borda padrão do hr */
+  border: none; /* Remove qualquer borda do hr */
+  display: block; /* Garante que o hr será exibido como um bloco */
 
-const BackgroundTexto = styled.div`
-background-color: #C084FC;
-height: 737,5px;
-width: 860px;
-display: flex;
-align-items: center;
-justify-content: center;
-
-`;
-
-
-const slideInRight = keyframes`
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateX(0);
-    opacity: 1;
+  &:before {
+    content: '';
+    position: absolute;
+    width: 2px; /* Largura da linha */
+    height: 100%; /* Altura da linha */
+    background-color: #c084fc; /* Cor da linha */
+    border-radius: 5px; 
   }
 `;
 
 const Titulo = styled.h2`
-width: 500px;
-height: 82px;
-font-family: Raleway;
-font-size: 25px;
-font-weight: 900;
-color: #FFFFFF;
-opacity: 0;
-animation: ${slideInRight} 2s ease-out;
-animation-fill-mode: forwards;
+  font-family: Raleway;
+  font-size: 25px;
+  font-weight: bold;
+  color: #000;
+position: relative;
+margin-bottom: 20px;
+  &::before {
+    content: '';
+    position: absolute;
+    width: 40%; /* Largura da linha antes do título */
+    height: 3px; /* Espessura da linha */
+    background-color: #c084fc;
+    bottom: -20px; /* Alinha a linha um pouco abaixo do título */
+    ${(props) => (props.positionType === 'left' ? 'left: -2px;' : 'right: 3px;')} 
+ border-radius: 10px;
+  }
 
-`;
+  /* Linha depois do título */
+  &::after {
+    content: '';
+    position: absolute;
+    width: 80%; /* Largura da linha depois do título */
+    height: 3px; /* Espessura da linha */
+    background-color: #c084fc;
+    bottom: -10px;
+    ${(props) => (props.positionType === 'left' ? 'left: -2px;' : 'right: 3px;')} 
+    border-radius: 10px;
+   /* Dá mais espaço entre as duas linhas */
+    
+  }
+
+`; // Adicionada chave de fechamento aqui
 
 const Subtitulo = styled.p`
-color: #ffff;
-font-family: Raleway;
-font-size: 25px;
-font-weight: 200;
-width: 640px;
-height: 533px;
-opacity: 0;
-  animation: ${slideInRight} 2s ease-out;
-  animation-fill-mode: forwards;
+  color: #000;
+  font-family: Raleway;
+  font-size: 20px;
+  font-weight: 200;
+  width: 100%;
+  max-width: 200px;
+  margin-top: 15px;
 `;
-
 
 const Boxtext = styled.div`
-  opacity: 0;
-  animation: ${slideInRight} 2s ease-out;
-  animation-fill-mode: forwards;
-  
-  
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  text-align: left;
 `;
 
-const Historypart = styled.section``;
+const Historypart = styled.div`
 
-const  MainHome2 =()=>{
-  const [ref, inView] = useInView({
-    threshold: 0.5, 
-    triggerOnce: true, 
-  });
+`;
 
 
-    return(
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 20px; /* Distância do botão em relação ao conteúdo acima */
+`;
+
+const Button = styled.button`
+  background-color: #d0a460; /* Cor de fundo inicial */
+  color: #fff;
+  width: 200px;
+  height: 50px;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: 300;
+  border: 0;
+  transition: background-color 0.3s ease; /* Efeito de transição para o hover */
+  cursor: pointer;
+
+  &:hover {
+    background-color:  #c0873f; /* Cor do botão ao passar o mouse */
+ /* Efeito de elevação */
+  }
+`;
+
+
+const MainHome2 = () => {
+  return (
     <>
-    <Historypart id='nossa-historia'>
-    <Conteiner>
-    <BackgroundImage>
-    <Img src="https://i.ibb.co/WVGCGkV/walpaper-livros.jpg" alt="livros"/>
-    </BackgroundImage>
-    <BackgroundTexto ref={ref}>
-    {inView && (
-    <Boxtext>
-  <Titulo>
-    Lume: Sua Biblioteca Online de Aventuras Literárias!
-    </Titulo>
-    <Subtitulo>
-    O Lume nasceu da paixão por livros de um grupo de amigos. Eles buscavam mais do que apenas um aplicativo para armazenar seus livros favoritos; queriam uma plataforma que os ajudasse a organizar suas leituras de forma eficiente e envolvente. Assim, surgiu o Lume, um espaço virtual onde os usuários podem não só catalogar seus livros, mas também interagir com eles de maneira única.
+      <Conteiner>
+        <Historypart>
+          
+          <StyledHr />
+          <Boxtext>
+            <Titulo>Modelos Exclusivos</Titulo>
+            <Subtitulo>
+              Utilize algoritmos para recomendar livros com base nas
+              preferências de leitura de cada usuário, aumentando as chances de
+              descoberta de novos títulos interessantes.
+            </Subtitulo>
+          </Boxtext>
+          
 
-No Lume, os usuários podem marcar livros como "quero ler", "lendo" e "abandonado", facilitando o acompanhamento de suas leituras e descobertas literárias. Além disso, o aplicativo oferece recomendações personalizadas com base nos gostos e hábitos de leitura de cada usuário, tornando-se um companheiro perfeito para os amantes da literatura. O Lume trouxe a magia da literatura para o mundo digital, conectando leitores e livros de uma forma nunca vista antes. 
-</Subtitulo>
-    </Boxtext>
-      )}
-    </BackgroundTexto>
-</Conteiner>
-</Historypart>
-    </>)
- }
+          <StyledHr />
+          <Boxtext>
+            <Titulo>Grupos de Leitura</Titulo>
+            <Subtitulo>
+              Crie espaços para grupos de leitura online, onde os usuários
+              possam discutir livros em conjunto, compartilhar insights e
+              participar de eventos relacionados à leitura.
+            </Subtitulo>{" "}
+          </Boxtext>
+        </Historypart>
 
- export default MainHome2;
+        <Img src={Homideitado} alt="pessoas lendo " />
+        <Historypart>
+          <StyledHr />
+          <Boxtext>
+            <Titulo >Favorito</Titulo>
+            <Subtitulo>
+              Permita que os usuários marquem seus livros favoritos, facilitando
+              o acesso a eles posteriormente e mostrando quais são os livros
+              mais apreciados pela comunidade.
+            </Subtitulo>
+          </Boxtext>
+          <StyledHr />
+          <Boxtext>
+            <Titulo >Desafios de Leitura</Titulo>
+            <Subtitulo>
+              Promova desafios de leitura periódicos, incentivando os usuários a
+              explorar diferentes gêneros e aumentar seu número de leituras ao
+              longo do tempo.
+            </Subtitulo>
+          </Boxtext>
+        </Historypart>
+      </Conteiner>
+      <ButtonContainer>
+      <Button>Junte-se a nos</Button></ButtonContainer>
+    </>
+  );
+};
+
+export default MainHome2;

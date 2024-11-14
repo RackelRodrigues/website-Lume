@@ -8,7 +8,7 @@ import styled from "styled-components";
 
 
 const Background = styled.div`
-background-color: #1C1D20;
+background-color: #fff;
 height: 100vh;
 display: flex;
 flex-direction: column;
@@ -22,7 +22,7 @@ const HeaderAdmin = styled.div`
   align-items: center;
  width: 100%;
  height: 50px;
-  background-color: #1C1D20;
+  background-color: #fff;
   color: white;
   padding: 10px 20px;
   position: fixed;
@@ -56,7 +56,7 @@ const Titulo = styled.h2`
 font-family: Raleway;
 font-size: 35px;
 font-weight: 400;
-color: #A3B1A9;
+color: #000;
 
 display: flex;
 justify-content: center;
@@ -158,9 +158,9 @@ const AdminScreen = () =>{
         <>
          <HeaderAdmin>
             <ButtonSvg onClick={handletoBack}>
-            <FaArrowLeft size={30} color="#fff"/></ButtonSvg>
+            <FaArrowLeft size={30} color="#000"/></ButtonSvg>
             <ButtonSvg onClick={handletohome}>
-            <PiHouse size={30} color="#fff"/></ButtonSvg>
+            <PiHouse size={30} color="#000"/></ButtonSvg>
 
         </HeaderAdmin>
         <Background>

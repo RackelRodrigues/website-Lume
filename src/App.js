@@ -1,11 +1,11 @@
 
-import styled from 'styled-components'
+import styled, { createGlobalStyle } from 'styled-components'
 
-export const GlobalStyle = styled.div`
+export const GlobalStyle = createGlobalStyle`
   * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+   
   }
 
   body {
@@ -14,20 +14,28 @@ export const GlobalStyle = styled.div`
 `;
 
 export const Background = styled.div`
-background-color: #1C1D20;
+background-color: #fff;
 height: 100vh;
 
 `;
 
 
 export const Background2 = styled.div`
-background-color: #1C1D20;
-height: 45vh;
+
+background-color: #fff;
+
 display: flex;
 
 flex-direction: column;
 justify-content: center;
 `;
+
+
+export const Background3 = styled.div`
+background-color: #f0f0f0;
+
+`;
+
 
 export const ContentWrapper = styled.div`
   padding-top: 150px; 

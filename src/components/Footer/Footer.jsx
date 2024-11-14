@@ -1,4 +1,5 @@
-import { FaArrowRight } from "react-icons/fa6";
+import { FaArrowRight, FaFacebook } from "react-icons/fa6";
+import Logo_lume from '../../../public/images/logo-lume.svg';
 import {
   Background,
   LogoImg,
@@ -20,8 +21,13 @@ import {
   Conteinernames,
   Conteinergrid,
   Conteinerleft,
+  ConteinerButtons,
+  ButtonSvg
 } from "./styles";
-
+import { FaInstagram } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
+import { CiFacebook } from "react-icons/ci";
+import { MdOutlineMail } from "react-icons/md";
 const Footer = () => {
   return (
     <>
@@ -31,12 +37,22 @@ const Footer = () => {
             <Conteinerleft>
               <ConteinerLogo>
                 <LogoImg
-                  src="https://i.ibb.co/23CypmW/logo-lume-para-7d58bfb5-3159-4e27-bba5-c88fc931f16e.png"
+                  src={Logo_lume}
                   alt="logo lume"
                 />
                 <TextLogo>Lume</TextLogo>
               </ConteinerLogo>
-
+<ConteinerButtons>
+  <ButtonSvg>
+    <CiFacebook size={30}/>
+  </ButtonSvg>
+  <ButtonSvg>
+    <FaInstagram size={25}/>
+  </ButtonSvg>
+  <ButtonSvg>
+    <FaXTwitter size={25}/>
+  </ButtonSvg>
+</ConteinerButtons>
               <Text>
                 Explore novos mundos com <Purple>Lume</Purple>: Sua jornada
                 literária começa aqui.
@@ -44,7 +60,7 @@ const Footer = () => {
               <Conteiner>
                 <Input placeholder="Insira seu email" />
                 <Button>
-                  <FaArrowRight size={15} color="#000" />
+                  <MdOutlineMail size={15} color="#000" />
                 </Button>
               </Conteiner>
             </Conteinerleft>

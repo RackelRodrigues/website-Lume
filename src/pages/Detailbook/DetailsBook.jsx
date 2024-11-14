@@ -17,7 +17,7 @@ import { useSelector } from "react-redux";
 
 
 const Background = styled.div`
-background-color: #1C1D20;
+background-color: #fff;
 height: 100vh;
 
 `;
@@ -34,7 +34,7 @@ const TitleBook = styled.h2`
 font-family: Raleway;
 font-size: 40px;
 font-weight: 300;
-color: #A3B1A9;
+color: #000;
 margin: 20px 0 20px 15px;
 `;
 
@@ -84,7 +84,7 @@ font-family: Raleway;
 font-size: 20px;
 font-weight: 300;
 width: 700px;
-color: #A3B1A9;
+color: #000;
 margin: 20px 0 20px 15px;
 
 
@@ -227,16 +227,16 @@ return (
             <Book src={bookDetails?.volumeInfo?.imageLinks?.thumbnail} alt={bookDetails?.volumeInfo?.title} />
             <ContainerSvg>
               <ButtonSvg onClick={adicionarLendo}>
-                <HiOutlineBookOpen size={30} color="#A3B1A9" />
+                <HiOutlineBookOpen size={30} color="#000" />
               </ButtonSvg>
               <ButtonSvg onClick={adicionarQueroLer}>
-                <PiBooksLight size={30} color="#A3B1A9" />
+                <PiBooksLight size={30} color="#000" />
               </ButtonSvg>
               <ButtonSvg nClick={adicionarjaLi}>
-                <CiBookmark size={30} color="#A3B1A9" />
+                <CiBookmark size={30} color="#000" />
               </ButtonSvg>
               <ButtonSvg onClick={adicionarAbandonei}>
-                <IoIosCloseCircleOutline size={30} color="#A3B1A9" />
+                <IoIosCloseCircleOutline size={30} color="#000" />
               </ButtonSvg>
 
               <ButtonSvg>

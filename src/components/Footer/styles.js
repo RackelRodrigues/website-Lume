@@ -2,7 +2,7 @@ import styled from'styled-components';
 
 export const Background = styled.div`
 background-color: #1C1D20;
-
+margin-top: 50px;
 
 `;
 
@@ -16,10 +16,6 @@ export const Box = styled.div`
 width: 100%;
 height: 400px;
 background-color:#D9D9D9;
-border-top-left-radius: 40px; 
-border-top-right-radius: 40px;
-border-bottom-left-radius: 0;
-border-bottom-right-radius: 0;
 
 
 `;
@@ -27,7 +23,7 @@ border-bottom-right-radius: 0;
 export const TextLogo = styled.h3`
 font-family: Raleway;
 font-size: 20px;
-font-weight: 500;
+font-weight: 200;
 color: #000;
 margin-left: 10px;
 
@@ -39,7 +35,29 @@ align-items: center;
 margin-bottom: 30px;
 `;
 
+export const ConteinerButtons = styled.div`
+display: flex;
+align-items: center;
+flex-direction: row;
+margin-bottom: 10px;
+`;
 
+export const ButtonSvg = styled.button`
+background-color: #C084FC;
+border-radius: 50%;
+width: 40px;
+height: 40px;
+border: 0;
+display: flex;
+align-items: center;
+justify-content: center;
+margin-right: 10px;
+&:hover {
+    background-color: #A166D6; 
+    cursor: pointer;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); 
+  }
+`;
 export const Input = styled.input`
 background-color:transparent;
 padding-left: 12px;

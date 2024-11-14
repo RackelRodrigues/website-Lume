@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 
 
 const Background = styled.div`
-background-color: #1C1D20;
+background-color: #fff;
 height: 100vh;
 
 overflow-x: hidden;

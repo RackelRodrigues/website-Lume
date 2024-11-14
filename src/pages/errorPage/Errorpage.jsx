@@ -10,7 +10,7 @@ const StyledLink = styled(Link)`
 `;
 
 const Background = styled.div`
-background-color: #1C1D20;
+background-color: #fff;
 height: 100vh;
 
 
@@ -19,9 +19,9 @@ height: 100vh;
 const Button = styled.button`
 width: 400px;
 height: 70px;
-background-color: #ffff;
+background-color: #000;
 border-radius: 75px;
-color: #000;
+color: #fff;
 font-family: Raleway;
 font-size: 20px;
 font-weight: 300;
@@ -33,7 +33,7 @@ const H1 = styled.h1`
 font-family: Raleway;
 font-size: 300px;
 font-weight: 500;
-color: #ffff;
+color: #000;
 margin-bottom: 20px;
 `;
 
@@ -42,7 +42,7 @@ const H3 = styled.h3`
 font-family: Raleway;
 font-size: 25px;
 font-weight: 200;
-color: #ffff;
+color: #000;
  margin-bottom: 40px;
 `;
 

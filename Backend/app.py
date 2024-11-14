@@ -4,6 +4,7 @@ from flask_wtf import FlaskForm
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo
+
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
 from peewee import DoesNotExist
@@ -16,8 +17,88 @@ from datetime import timedelta
 import os, re
 import requests
 from flask_cors import CORS
+import os
+from dotenv import load_dotenv
+import sendgrid
+import jwt
+from datetime import datetime, timedelta
+
+load_dotenv();
 
 
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
+app.config['SECRET_KEY'] = 'aP34!eK@82&dO39s#BzLxG$wMpt^Qd%yZfHk!1JpN3q&UwFv'
+app.config['SENDGRID_API_KEY'] = os.getenv('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')
+jwt = JWTManager(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
+api
+login_manager.login_view = 'login'
+SENDGRID_API_KEY = os.getenv('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')
+
+
+
+# Lógica de autenticação
+def validate_registration(email, password, confirm_password, is_active, is_admin):
+    if not email or not password or not confirm_password:
+        return False, "Por favor, preencha todos os campos."
+    
+    if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
+        return False, "E-mail inválido. Por favor, insira um e-mail válido."
+    if len(password) < 8:
+        return False, "A senha deve ter pelo menos 8 caracteres."
+    
+    if not re.search(r'[a-z]', password) or not re.search(r'[A-Z]', password) or not re.search(r'\d', password):
+        return False, "A senha deve conter pelo menos uma letra minúscula, uma letra maiúscula e um dígito."
+    if password != confirm_password:
+        return False, "A senha e a confirmação de senha não correspondem."
+    
+    return True, "Cadastro válido."
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id) 
+
+
+from sendgrid.helpers.mail import Mail as SendGridMail
+import jwt
+from dotenv import load_dotenv
+
+# Carrega as variáveis do arquivo .env
+load_dotenv()
+
+
+
+
+
+print(os.getenv("SENDGRID_API_KEY"))
+
+
+def send_email(to_email, subject, content):
+    """Função para enviar e-mail utilizando SendGrid"""
+    message = SendGridMail(
+        from_email='rackelrodrigues247@gmail.com',
+        to_emails=to_email,
+        subject=subject,
+        plain_text_content=content
+    )
+    try:
+        #sg = SendGridAPIClient(api_key=app.config['SENDGRID_API_KEY'])
+        sg = SendGridAPIClient(app.config['SENDGRID_API_KEY'])
+        response = sg.send(message)
+        print(f"Status code: {response.status_code}")
+        print(f"Body: {response.body}")
+        print(f"Headers: {response.headers}")
+    except Exception as e:
+        print(f"Erro ao enviar e-mail: {str(e)}")
+
+def generate_reset_token(user_id):
+    """Gera um token JWT com validade de 30 minutos"""
+    expiration = timedelta(minutes=30)
+    token = create_access_token(identity=user_id, expires_delta=expiration)
+    return token
 
 class CadastroForm(FlaskForm):
     email = StringField('email', validators=[DataRequired(), Email()])
@@ -26,10 +107,8 @@ class CadastroForm(FlaskForm):
     
 
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
-app.config['SECRET_KEY'] = 'aP34!eK@82&dO39s#BzLxG$wMpt^Qd%yZfHk!1JpN3q&UwFv'
-jwt = JWTManager(app)
+CORS(app, resources={r"/": {"origins": ""}})
+app.config['SECRET_KEY'] = 'aP34!eK@82&dO39s#BzLxG$wMpt^Qd%yZfHk!1JpN3q&UwFv',
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -51,18 +130,82 @@ def validate_registration(email, password, confirm_password, is_active, is_admin
     
     return True, "Cadastro válido."
 
-<<<<<<< HEAD
+
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(user_id) 
-=======
+    return Usuarios.query.get(user_id) 
+
 # Registrar atividades dos usuários para o feed
 def registrar_atividade(usuario_id, descricao):
     try:
         Atividades.create(usuario_id=usuario_id, descricao=descricao)
     except Exception as e:
         print(f'Erro ao registrar atividade: {str(e)}')
->>>>>>> 3e9de9aba1d54a81a834b848e5e474fb5a31fdec
+
+import jwt
+from datetime import datetime, timedelta
+
+def generate_reset_token(user_id):
+    expiration = datetime.utcnow() + timedelta(hours=1)  # Token válido por 1 hora
+    token = jwt.encode(
+        {'user_id': user_id, 'exp': expiration}, 
+        app.config['JWT_SECRET_KEY'], 
+        algorithm='HS256'
+    )
+    return token
+
+@app.route('/reset_password', methods=['GET', 'POST'])
+def reset_password():
+    """Rota para solicitar redefinição de senha"""
+    if request.method == 'POST':
+        email = request.form['email']
+        
+        # Usando Peewee para buscar o usuário pelo e-mail
+        try:
+            user = Usuarios.get(Usuarios.email == email)
+            token = generate_reset_token(user.email)  # Gere o token com o e-mail do usuário
+            reset_url = url_for('confirm_reset', token=token, _external=True)
+            send_email(email, 'Redefinição de Senha', f'Clique no link para redefinir sua senha: {reset_url}')
+            flash('Um e-mail com o link de redefinição de senha foi enviado.')
+            return redirect(url_for('login'))
+        
+        except Usuarios.DoesNotExist:
+            flash('E-mail não encontrado', 'error')
+            return redirect(url_for('reset_password'))
+
+@app.route('/confirm_reset/<token>', methods=['GET', 'POST'])
+def confirm_reset(token):
+    try:
+        # Decodifica o token para verificar a validade e obter o e-mail
+        decoded_token = jwt.decode(token, app.config['JWT_SECRET_KEY'], algorithms=['HS256'])
+        user_email = decoded_token['user_email']
+    except jwt.ExpiredSignatureError:
+        flash('O link de redefinição de senha expirou.')
+        return redirect(url_for('reset_password'))
+    except jwt.InvalidTokenError:
+        flash('Token inválido.')
+        return redirect(url_for('reset_password'))
+    
+    if request.method == 'POST':
+        new_password = request.form['new_password']
+        confirm_password = request.form['confirm_password']
+        
+        if new_password == confirm_password:
+            try:
+                # Aqui estamos buscando o usuário pelo email, não pelo id
+                usuario = Usuarios.get(Usuarios.email == user_email)
+                usuario.senha = new_password  # Atualiza a senha
+                usuario.save()  # Salva a atualização no banco de dados
+                flash('Senha atualizada com sucesso!')
+                return redirect(url_for('login'))
+            except Usuarios.DoesNotExist:
+                flash('Usuário não encontrado.')
+        else:
+            flash('As senhas não coincidem. Tente novamente.')
+
+    return redirect(url_for('reset_password'))  # Caso POST não ocorra ou falhe
+
+
 
 
 @app.route("/cadastro", methods=['POST'])
@@ -313,7 +456,7 @@ def search_books():
     query = data.get('query', '')
     
     api_key = 'AIzaSyCsUUXAR5RnP5beEmDu95DID0Wqz8dyTPo'
-    url = f'https://www.googleapis.com/books/v1/volumes?q={query}&key={api_key}'
+    url = f'https://www.googleapis.com/books/v1/volumes?q={query}&key=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'
 
     response = requests.get(url)
     data = response.json()
@@ -349,7 +492,6 @@ def popular_books():
 @app.route('/adicionar_quero_ler/<livro_id>', methods=['POST'])
 @login_required
 def adicionar_quero_ler(livro_id):
-    try:
         # Verifica se o usuário está autenticado
         if current_user.is_authenticated:
             # Faça aqui o que você precisa fazer quando o usuário está autenticado
@@ -358,22 +500,11 @@ def adicionar_quero_ler(livro_id):
             livro_quero_ler = LivroQueroLer.create(usuario=current_user, livro_id=livro_id)
             return jsonify({'message': 'Livro adicionado à lista "Quero Ler" com sucesso.'}), 200
         else:
-<<<<<<< HEAD
-            # Retorna uma mensagem de erro se o usuário não estiver autenticado
-            return jsonify({'error': 'Usuário não autenticado'}), 401
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    
-
-
-#rota para adicionar ao lendo
-=======
             return jsonify({'error': 'Token inválido para este usuário.'}), 401
-    else:
-        return jsonify({'error': 'Header Authorization não encontrado.'}), 401
+  
    
 
->>>>>>> 3e9de9aba1d54a81a834b848e5e474fb5a31fdec
+
 @app.route('/adicionar_lendo', methods=['POST'])
 def adicionar_lendo():
     data = request.json

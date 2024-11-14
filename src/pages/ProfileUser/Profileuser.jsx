@@ -9,7 +9,7 @@ import { FaStar } from "react-icons/fa";
 
 
 const Background = styled.div`
-background-color: #1C1D20;
+background-color: #fff;
 height: 100%;
 
 `;
@@ -58,12 +58,12 @@ const Line = styled.span`
     margin-bottom: 8px ;
     position: relative;
     height: 1; 
-    background-color: #A3B1A9; 
+    background-color: #000; 
     width: 700px; 
     &::after {
         content: '';
         flex: 0.8;
-        border-top: 1px solid #A3B1A9;
+        border-top: 1px solid #000;
         margin: 0 7px;
     }
 `;
@@ -76,12 +76,12 @@ const Line2 = styled.span`
     margin-bottom: 8px ;
     position: relative;
     height: 1; 
-    background-color: #A3B1A9; 
+    background-color: #000; 
     width: 500px; 
     &::after {
         content: '';
         flex: 0.8;
-        border-top: 1px solid #A3B1A9;
+        border-top: 1px solid #000;
         margin: 0 7px;
     }
 `;
@@ -164,7 +164,7 @@ const Leiturometro = styled.h3`
 font-family: Raleway;
 font-size: 13.17px;
 font-weight: 400;
-color: #A3B1A9;
+color: #000;
 
 
 `;
@@ -174,7 +174,7 @@ const Bio = styled.p`
 font-family: Inter;
 font-size: 13.6px;
 font-weight: 200;
-color: #A3B1A9;
+color: #000;
 
 
 
@@ -202,7 +202,7 @@ const Username = styled.h2`
 font-family: Raleway;
 font-size: 28.45px;
 font-weight: 400;
-color: #fff;
+color: #000;
 
 
 `;
@@ -262,7 +262,7 @@ const User =()=>{
         <Box>
 <Boxlist>
 <TitleList>
-    <CiBookmark size={20}color="#C084FC"/>
+    <CiBookmark size={20}color="#000"/>
     já li
     
     </TitleList>
@@ -282,7 +282,7 @@ const User =()=>{
         <Boxlist2>
         
 <TitleList>
-    <FaStar size={20}color="#fbbf24"/>
+    <FaStar size={20}color="#000"/>
     Favoritos
 
 </TitleList>
@@ -301,7 +301,7 @@ const User =()=>{
         <Box>
 <Boxlist>
 <TitleList>
-    <HiOutlineBookOpen size={20}color="#C084FC"/>
+    <HiOutlineBookOpen size={20}color="#000"/>
     Lendo
     
     </TitleList>
@@ -324,7 +324,7 @@ const User =()=>{
         <Boxlist2>
         
 <TitleList>
-    <FaStar size={20}color="#fbbf24"/>
+    <FaStar size={20}color="#000"/>
     Abandonei
 
 </TitleList>
@@ -343,7 +343,7 @@ const User =()=>{
         <Box>
 <Boxlist>
 <TitleList>
-    <PiBooksLight size={20}color="#C084FC"/>
+    <PiBooksLight size={20}color="#000"/>
     Quero ler
     
     </TitleList>

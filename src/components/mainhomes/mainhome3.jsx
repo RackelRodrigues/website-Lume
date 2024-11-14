@@ -1,162 +1,142 @@
-import styled from'styled-components';
-import { PiQuotes } from "react-icons/pi";
+import styled from "styled-components";
+import group from "../../../public/images/Group-pessoal.svg";
+import Present from "../../../public/images/PresenteHomem.svg";
+import MeninaVoando from "../../../public/images/MeninaVoando.svg";
+import { IoEllipsisHorizontalSharp } from "react-icons/io5";
+import { GoArrowUpRight } from "react-icons/go";
 
-
-const IconWrapper = styled.div`
- display: flex;
- align-items: center;
- justify-content: center;
- flex-direction: column;
+const ConteinerAll = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  height: 50vh;
 `;
 
-const StyledPiQuotes = styled(PiQuotes)`
-  position: absolute;
-  top: 80%;
-  right: 21px; 
-  color: #D0A460; 
+const Conteiner = styled.div`
+  width: 300px;
+  height: 300px;
+  ${(props) =>
+    props.Colors === "purple"
+      ? "background-color: #C084FC;"
+      : "background-color: #e1c28a;"}
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+ 
 `;
 
-const Box = styled.div`
-width: 100%;
-max-width: 360px;
-height: 155px;
-border-radius: 60px;
-background-color: rgba(255, 255, 255, 0.15);
-backdrop-filter:blur(8.5px);
+const ConteinerHeader = styled.div`
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 280px;
+  margin-top: 8px;
 `;
 
-const Imgperson= styled.img`
-width: 40px;
-height: 40px;
-border-radius: 50%;
-margin-left: 20px;
+const Divlink = styled.div`
+  width: 110px;
+  height: 25px;
+  background-color: #fff;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
 `;
 
+const Name = styled.a`
+  font-family: Raleway;
+  font-size: 15px;
+  font-weight: 200;
 
-const Titulo = styled.h2`
-font-family: Raleway;
-font-size: 27px;
-font-weight: 600;
-color: #D0A460;
-display: flex;
-align-items: center;
-justify-content: center;
-margin: 0px 0px 20px 0px;
-padding-top: 20px;
+  color: #000;
+  margin-left: 8px;
 `;
 
-const Name= styled.h2`
-font-family: Raleway;
-font-size: 14px;
-font-weight: 800;
-color: #1C1D20;
-margin-right: 5px;
-
+const Circlesvg = styled.div`
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #d9d9d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
 `;
 
-const Text = styled.h2`
-font-family: Raleway;
-font-size: 14px;
-font-weight: 5800;
-color: #1C1D20;
-margin-right: 5px;
-
+const ConteinerPoint = styled.div`
+  width: 30px;
+  height: 13px;
+  background-color: #fff;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
-const Coment = styled.h2`
-font-family: Raleway;
-font-size: 15px;
-font-weight: 500;
-color: #D0A460;
-white-space: pre-wrap;
-
-
+const Img = styled.img`
+  width: 100%;
+  height: 100%;
 `;
 
-const Comentario = styled.p`
-color:  #1C1D20;
-font-family: Raleway;
-font-size: 12px;
-font-weight: 400;
-width: 300px;
-height: 150;
+const MainHome3 = () => {
+  return (
+    <>
+      <ConteinerAll>
+        <Conteiner Colors="purple">
+          <ConteinerHeader>
+            <Divlink>
+              <Name>Serviços</Name>
 
-`;
+              <Circlesvg>
+                <GoArrowUpRight />
+              </Circlesvg>
+            </Divlink>
+            <ConteinerPoint>
+              <IoEllipsisHorizontalSharp size={20} />
+            </ConteinerPoint>
+          </ConteinerHeader>
+          <Img src={MeninaVoando} alt="menina em cima de livro" />
+        </Conteiner>
 
-const Conteinerheader = styled.div`
-display: flex;
-align-items: center;
-justify-content: center;
-margin-top: 10px;
+        <Conteiner>
+          <ConteinerHeader>
+            <Divlink>
+              <Name>Produtos</Name>
 
-white-space: pre-wrap;
-`;
+              <Circlesvg>
+                <GoArrowUpRight />
+              </Circlesvg>
+            </Divlink>
 
+            <ConteinerPoint>
+              <IoEllipsisHorizontalSharp size={20} />
+            </ConteinerPoint>
+          </ConteinerHeader>
+          <Img src={Present} alt="presente com rapaz" />
+        </Conteiner>
+        <Conteiner Colors="purple">
+          <ConteinerHeader>
+            <Divlink>
+              <Name>Sobre nos</Name>
 
-const Conteiners = styled.div`
-display: flex;
-align-items: center;
-justify-content: space-around;
-
-`;
-
-
-const MainHome3 =()=>{
-    return(
-        <>
-        <Titulo>Cometarios</Titulo>
-        
-    <Conteiners>
-        <Box>
-            
-        <Conteinerheader>
-       <Imgperson src='https://i.ibb.co/pR871HG/nega.jpg' alt='pessoas fotos'/>
-       <Name>Dandara</Name>
-       <Text>comentou</Text>
-       <Coment>Anne de Avonlea</Coment>
-        </Conteinerheader>
-         <PiQuotes size={25} color='#D0A460' style={{ transform: 'rotate(180deg)' }}/> 
-        <IconWrapper>
-         <Comentario>Este livro é um clássico atemporal que encanta 
-leitores de todas as idades. A história de Anne Shirley é comovente e inspiradora, e nos lembra da importância de sonhar e acreditar em nós mesmos</Comentario>
-       </IconWrapper>
-       <StyledPiQuotes size={25} />
-        </Box>
-
-        <Box>
-            
-            <Conteinerheader>
-           <Imgperson src='https://i.ibb.co/XzVkcXF/men.jpg' alt='pessoas fotos'/>
-           <Name>Gabriel</Name>
-           <Text>comentou</Text>
-           <Coment>1984</Coment>
-            </Conteinerheader>
-             <PiQuotes size={25} color='#D0A460' style={{ transform: 'rotate(180deg)' }}/> 
-            <IconWrapper>
-             <Comentario>Este livro é um clássico atemporal que encanta 
-    leitores de todas as idades. A história de Anne Shirley é comovente e inspiradora, e nos lembra da importância de sonhar e acreditar em nós mesmos</Comentario>
-           </IconWrapper>
-           <StyledPiQuotes size={25} />
-           </Box>
-
-           <Box>
-            
-            <Conteinerheader>
-           <Imgperson src='https://i.ibb.co/1fY0xCY/japones.jpg' alt='pessoas fotos'/>
-           <Name>Luciano</Name>
-           <Text>comentou</Text>
-           <Coment>Habitos Atomicos</Coment>
-            </Conteinerheader>
-             <PiQuotes size={25} color='#D0A460' style={{ transform: 'rotate(180deg)' }}/> 
-            <IconWrapper>
-             <Comentario>Este livro é um clássico atemporal que encanta 
-    leitores de todas as idades. A história de Anne Shirley é comovente e inspiradora, e nos lembra da importância de sonhar e acreditar em nós mesmos</Comentario>
-           </IconWrapper>
-           <StyledPiQuotes size={25} />
-           </Box>
-           </Conteiners>
-        </>
-    )
-}
+              <Circlesvg>
+                <GoArrowUpRight />
+              </Circlesvg>
+            </Divlink>
+            <ConteinerPoint>
+              <IoEllipsisHorizontalSharp size={20} />
+            </ConteinerPoint>
+          </ConteinerHeader>
+          <Img src={group} alt="Uma pessoal ai" />
+        </Conteiner>
+      </ConteinerAll>{" "}
+    </>
+  );
+};
 
 export default MainHome3;
