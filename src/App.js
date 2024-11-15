@@ -28,12 +28,13 @@ display: flex;
 
 flex-direction: column;
 justify-content: center;
+padding-bottom: 50px;
 `;
 
 
 export const Background3 = styled.div`
 background-color: #f0f0f0;
-
+margin-top: 50px;
 `;
 
 

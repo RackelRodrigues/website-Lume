@@ -29,6 +29,8 @@ load_dotenv();
 
 
 
+
+
 # Lógica de autenticação
 def validate_registration(email, password, confirm_password, is_active, is_admin):
     if not email or not password or not confirm_password:
@@ -63,7 +65,6 @@ load_dotenv()
 
 
 
-print(os.getenv("SENDGRID_API_KEY"))
 
 
 def send_email(to_email, subject, content):
@@ -75,8 +76,7 @@ def send_email(to_email, subject, content):
         plain_text_content=content
     )
     try:
-        #sg = SendGridAPIClient(api_key=app.config['SENDGRID_API_KEY'])
-        sg = SendGridAPIClient(app.config['SENDGRID_API_KEY'])
+      
         response = sg.send(message)
         print(f"Status code: {response.status_code}")
         print(f"Body: {response.body}")

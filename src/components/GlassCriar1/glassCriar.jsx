@@ -29,7 +29,6 @@ import {
   Erro,
   Form,
 } from './styles';
- // Substitua 'nomeDoArquivo' pelo nome do arquivo onde você definiu esses estilos
 
 const GlassCriarConta = () => {
   const [fotoPreview, setFotoPreview] = useState("");

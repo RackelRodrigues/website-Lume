@@ -15,6 +15,7 @@ import ProfileUser from "./pages/ProfileUser/Profileuser.jsx";
 import Errorpage from "../src/pages/errorPage/Errorpage.jsx";
 import Detailbooks from "./pages/Detailbook/DetailsBook.jsx";
 import Adminscreen from "./pages/AdminScreen/Adminscreen.jsx";
+import ForgetPassword from "./pages/Forgertpassword/forgetpassaword.jsx";
 import "./index.css";
 import { Provider } from "react-redux";
 import store from "./redux/store.js";
@@ -32,6 +33,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/pageuser" element={<ProfileUser />} />
           <Route path="/Detailbook" element={<Detailbooks />} />
           <Route path="/Adminscreen" element={<Adminscreen />} />
+          <Route path="/ForgetPassword" element={<ForgetPassword />} />
           <Route
             path="*"
             element={<Errorpage error={{ message: "Página não encontrada" }} />}

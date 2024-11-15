@@ -23,12 +23,11 @@ function App() {
           </ContentWrapper>
         </Background>
         <MainHome2 />
-        <Background2>
           <MainHome3 />
-        </Background2>
-        <Background3>
+    
+   
           <MainHome4 />
-        </Background3>
+
         <Footer />
      
     </>

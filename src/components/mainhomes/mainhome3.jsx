@@ -10,6 +10,7 @@ const ConteinerAll = styled.div`
   flex-direction: row;
   justify-content: space-around;
   height: 50vh;
+  margin-bottom: 20px;
 `;
 
 const Conteiner = styled.div`

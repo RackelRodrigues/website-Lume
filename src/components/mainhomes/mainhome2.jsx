@@ -5,7 +5,7 @@ const Conteiner = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 50px;
 `;
 
 
@@ -16,19 +16,19 @@ const Img = styled.img`
 `;
 const StyledHr = styled.hr`
  position: relative;
-  width: 2px; /* Largura da linha */
-  height: 80%; /* Definindo a altura */
-  margin: 20px auto; /* Espaçamento automático para centralizar */
-  background-color: transparent; /* Remove qualquer borda padrão do hr */
-  border: none; /* Remove qualquer borda do hr */
-  display: block; /* Garante que o hr será exibido como um bloco */
+  width: 2px; 
+  height: 80%; 
+  margin: 20px auto; 
+  background-color: transparent;
+  border: none; 
+  display: block; 
 
   &:before {
     content: '';
     position: absolute;
-    width: 2px; /* Largura da linha */
-    height: 100%; /* Altura da linha */
-    background-color: #c084fc; /* Cor da linha */
+    width: 2px; 
+    height: 100%; 
+    background-color: #c084fc; 
     border-radius: 5px; 
   }
 `;
@@ -43,29 +43,27 @@ margin-bottom: 20px;
   &::before {
     content: '';
     position: absolute;
-    width: 40%; /* Largura da linha antes do título */
-    height: 3px; /* Espessura da linha */
+    width: 40%; 
+    height: 3px; 
     background-color: #c084fc;
-    bottom: -20px; /* Alinha a linha um pouco abaixo do título */
+    bottom: -20px;
     ${(props) => (props.positionType === 'left' ? 'left: -2px;' : 'right: 3px;')} 
  border-radius: 10px;
   }
 
-  /* Linha depois do título */
   &::after {
     content: '';
     position: absolute;
-    width: 80%; /* Largura da linha depois do título */
-    height: 3px; /* Espessura da linha */
+    width: 80%; 
+    height: 3px; 
     background-color: #c084fc;
     bottom: -10px;
     ${(props) => (props.positionType === 'left' ? 'left: -2px;' : 'right: 3px;')} 
     border-radius: 10px;
-   /* Dá mais espaço entre as duas linhas */
     
   }
 
-`; // Adicionada chave de fechamento aqui
+`; 
 
 const Subtitulo = styled.p`
   color: #000;
@@ -93,11 +91,11 @@ const ButtonContainer = styled.div`
   display: flex;
   justify-content: center;
   width: 100%;
-  margin-top: 20px; /* Distância do botão em relação ao conteúdo acima */
+  margin-top: 20px; 
 `;
 
 const Button = styled.button`
-  background-color: #d0a460; /* Cor de fundo inicial */
+  background-color: #d0a460; 
   color: #fff;
   width: 200px;
   height: 50px;
@@ -105,12 +103,11 @@ const Button = styled.button`
   font-size: 20px;
   font-weight: 300;
   border: 0;
-  transition: background-color 0.3s ease; /* Efeito de transição para o hover */
-  cursor: pointer;
-
+  transition: background-color 0.3s ease; 
+  margin-bottom: 40px;
   &:hover {
-    background-color:  #c0873f; /* Cor do botão ao passar o mouse */
- /* Efeito de elevação */
+    background-color:  #c0873f; 
+
   }
 `;
 

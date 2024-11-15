@@ -1,6 +1,21 @@
-const ForgetPassword =()=>{
-    return(<></>)
+import { Background,     Box,
+   } from "./style";
+
+
+
+const Forgetpassword =()=>{
+    return(<>
+    
+    <Background>
+
+    
+       
+
+    </Background>
+    </>)
 }
 
 
-export default ForgetPassword;
+
+
+export default Forgetpassword;

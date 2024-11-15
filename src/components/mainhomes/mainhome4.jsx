@@ -20,6 +20,8 @@ const Conteinercoment = styled.div`
 
   background-color: #fff;
   border: none;
+
+  padding-bottom: 15px;
 `;
 
 const Imgfoto = styled.img`
@@ -103,6 +105,7 @@ const Coment = styled.h3`
   font-family: Raleway;
   font-size: 13px;
   font-weight: 200;
+  padding-top: 8px;
 `;
 
 const Namebook = styled.h2`
