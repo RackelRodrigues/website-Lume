@@ -12,5 +12,5 @@ Este projeto é uma aplicação para amantes de livros, permitindo que os usuár
 ## Tecnologias Utilizadas
 - **Backend**: Python
 - **Frontend**: React
-=======
+
 
